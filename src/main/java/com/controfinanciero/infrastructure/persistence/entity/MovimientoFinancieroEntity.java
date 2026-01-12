@@ -2,6 +2,8 @@ package com.controfinanciero.infrastructure.persistence.entity;
 
 import com.controfinanciero.domain.model.enums.TipoMovimiento;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +30,8 @@ public class MovimientoFinancieroEntity {
     private Long userId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "movement_type", nullable = false, length = 20)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "movement_type", nullable = false)
     private TipoMovimiento movementType;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)

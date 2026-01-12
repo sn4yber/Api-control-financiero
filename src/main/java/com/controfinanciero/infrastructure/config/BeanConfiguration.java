@@ -1,6 +1,9 @@
 package com.controfinanciero.infrastructure.config;
+
 import com.controfinanciero.application.usecase.Meta.CrearMetaFinancieraUseCase;
 import com.controfinanciero.application.usecase.Meta.ObtenerMetasFinancierasUseCase;
+import com.controfinanciero.application.usecase.movimiento.CrearMovimientoFinancieroUseCase;
+import com.controfinanciero.application.usecase.movimiento.ObtenerMovimientosFinancierosUseCase;
 import com.controfinanciero.domain.repository.MetaFinancieraRepository;
 import com.controfinanciero.application.usecase.categoria.CrearCategoriaUseCase;
 import com.controfinanciero.application.usecase.categoria.ObtenerCategoriasUseCase;
@@ -11,6 +14,7 @@ import com.controfinanciero.application.usecase.fuente.ObtenerFuentesIngresoUseC
 import com.controfinanciero.domain.repository.CategoriaRepository;
 import com.controfinanciero.domain.repository.ContextoFinancieroRepository;
 import com.controfinanciero.domain.repository.FuenteIngresoRepository;
+import com.controfinanciero.domain.repository.MovimientoFinancieroRepository;
 import com.controfinanciero.domain.repository.UsuarioRepository;
 import com.controfinanciero.domain.service.CalculadorProgresoMeta;
 import com.controfinanciero.domain.service.CalculadorSaldo;
@@ -102,6 +106,39 @@ public class BeanConfiguration {
             MetaFinancieraRepository metaRepository
     ) {
         return new ObtenerMetasFinancierasUseCase(metaRepository);
+    }
+
+    // Use Cases - Movimiento Financiero
+    @Bean
+    public CrearMovimientoFinancieroUseCase crearMovimientoFinancieroUseCase(
+            MovimientoFinancieroRepository movimientoRepository,
+            UsuarioRepository usuarioRepository,
+            CategoriaRepository categoriaRepository,
+            FuenteIngresoRepository fuenteIngresoRepository,
+            MetaFinancieraRepository metaRepository
+    ) {
+        return new CrearMovimientoFinancieroUseCase(
+                movimientoRepository,
+                usuarioRepository,
+                categoriaRepository,
+                fuenteIngresoRepository,
+                metaRepository
+        );
+    }
+
+    @Bean
+    public ObtenerMovimientosFinancierosUseCase obtenerMovimientosFinancierosUseCase(
+            MovimientoFinancieroRepository movimientoRepository,
+            CategoriaRepository categoriaRepository,
+            FuenteIngresoRepository fuenteIngresoRepository,
+            MetaFinancieraRepository metaRepository
+    ) {
+        return new ObtenerMovimientosFinancierosUseCase(
+                movimientoRepository,
+                categoriaRepository,
+                fuenteIngresoRepository,
+                metaRepository
+        );
     }
 }
 

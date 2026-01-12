@@ -1,0 +1,1025 @@
+{
+	"info": {
+		"_postman_id": "api-control-financiero-2026",
+		"name": "API Control Financiero - Completa",
+		"description": "Colección completa de endpoints para la API de Control Financiero Personal\n\nArquitectura: Clean Architecture + DDD\nBase de datos: PostgreSQL (Neon)\nFramework: Spring Boot 3.5.9\n\nAutor: Snayber\nFecha: Enero 2026",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Usuarios",
+			"item": [
+				{
+					"name": "Crear Usuario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"snayber\",\n    \"email\": \"snayber@example.com\",\n    \"password\": \"password123\",\n    \"fullName\": \"Snayber Developer\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/usuarios",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"usuarios"
+							]
+						},
+						"description": "Crea un nuevo usuario en el sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Usuario por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/usuarios/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"usuarios",
+								"1"
+							]
+						},
+						"description": "Obtiene la información de un usuario por su ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de usuarios"
+		},
+		{
+			"name": "2. Contexto Financiero",
+			"item": [
+				{
+					"name": "Crear Contexto Financiero",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"tipoIngreso\": \"MONTHLY\",\n    \"tieneIngresoVariable\": false,\n    \"porcentajeAhorroDeseado\": 20.0,\n    \"periodoAnalisis\": \"MONTHLY\",\n    \"codigoMoneda\": \"COP\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/contextos-financieros",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"contextos-financieros"
+							]
+						},
+						"description": "Define el contexto financiero de un usuario (tipo de ingreso, periodo de análisis, etc.)"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Contexto por Usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/contextos-financieros/usuario/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"contextos-financieros",
+								"usuario",
+								"1"
+							]
+						},
+						"description": "Obtiene el contexto financiero de un usuario"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión del contexto financiero del usuario"
+		},
+		{
+			"name": "3. Categorías",
+			"item": [
+				{
+					"name": "Crear Categoría - Gastos Personales",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Gastos Personales\",\n    \"descripcion\": \"Gastos del día a día\",\n    \"colorHex\": \"#FF5733\",\n    \"icono\": \"wallet\",\n    \"tipoCategoria\": \"EXPENSE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/categorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Categoría - Transporte",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Transporte\",\n    \"descripcion\": \"Gastos de transporte y combustible\",\n    \"colorHex\": \"#FF9800\",\n    \"icono\": \"car\",\n    \"tipoCategoria\": \"EXPENSE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/categorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Categoría - Alimentación",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Alimentación\",\n    \"descripcion\": \"Comida y bebidas\",\n    \"colorHex\": \"#4CAF50\",\n    \"icono\": \"restaurant\",\n    \"tipoCategoria\": \"EXPENSE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/categorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Todas las Categorías",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/categorias/usuario/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"categorias",
+								"usuario",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Categorías Activas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/categorias/usuario/1?activas=true",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"categorias",
+								"usuario",
+								"1"
+							],
+							"query": [
+								{
+									"key": "activas",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener por Tipo - EXPENSE",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/categorias/usuario/1?tipo=EXPENSE",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"categorias",
+								"usuario",
+								"1"
+							],
+							"query": [
+								{
+									"key": "tipo",
+									"value": "EXPENSE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de categorías de movimientos"
+		},
+		{
+			"name": "4. Fuentes de Ingreso",
+			"item": [
+				{
+					"name": "Crear Fuente - Salario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Salario Mensual\",\n    \"descripcion\": \"Salario trabajo principal\",\n    \"tipoFuente\": \"SALARY\",\n    \"esIngresoReal\": true,\n    \"activa\": true\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/fuentes-ingreso",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"fuentes-ingreso"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Fuente - Freelance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Desarrollo Freelance\",\n    \"descripcion\": \"Proyectos de desarrollo web\",\n    \"tipoFuente\": \"FREELANCE\",\n    \"esIngresoReal\": true,\n    \"activa\": true\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/fuentes-ingreso",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"fuentes-ingreso"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Fuente - Préstamo ICETEX",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Préstamo ICETEX\",\n    \"descripcion\": \"Préstamo estudiantil\",\n    \"tipoFuente\": \"LOAN\",\n    \"esIngresoReal\": false,\n    \"activa\": true\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/fuentes-ingreso",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"fuentes-ingreso"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Todas las Fuentes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/fuentes-ingreso/usuario/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"fuentes-ingreso",
+								"usuario",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Fuentes Activas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/fuentes-ingreso/usuario/1?activas=true",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"fuentes-ingreso",
+								"usuario",
+								"1"
+							],
+							"query": [
+								{
+									"key": "activas",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de fuentes de ingreso"
+		},
+		{
+			"name": "5. Metas Financieras",
+			"item": [
+				{
+					"name": "Crear Meta - Moto XR 190L",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Comprar Moto XR 190L\",\n    \"descripcion\": \"Moto para transporte\",\n    \"montoObjetivo\": 15000000,\n    \"fechaObjetivo\": \"2026-12-31\",\n    \"prioridad\": \"HIGH\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/metas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"metas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Meta - PC Gamer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Armar PC Gamer\",\n    \"descripcion\": \"PC para desarrollo y gaming\",\n    \"montoObjetivo\": 8000000,\n    \"fechaObjetivo\": \"2026-06-30\",\n    \"prioridad\": \"HIGH\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/metas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"metas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Meta - Viaje Cartagena",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Viaje a Cartagena\",\n    \"descripcion\": \"Vacaciones familiares\",\n    \"montoObjetivo\": 3000000,\n    \"fechaObjetivo\": \"2026-07-15\",\n    \"prioridad\": \"MEDIUM\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/metas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"metas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Meta - Fondo Emergencia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuarioId\": 1,\n    \"nombre\": \"Fondo de Emergencia\",\n    \"descripcion\": \"Reserva para imprevistos\",\n    \"montoObjetivo\": 5000000,\n    \"fechaObjetivo\": \"2026-12-31\",\n    \"prioridad\": \"CRITICAL\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/metas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"metas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Todas las Metas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/metas/usuario/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"metas",
+								"usuario",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Metas Activas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/metas/usuario/1?estado=ACTIVE",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"metas",
+								"usuario",
+								"1"
+							],
+							"query": [
+								{
+									"key": "estado",
+									"value": "ACTIVE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de metas financieras"
+		},
+		{
+			"name": "6. Movimientos Financieros",
+			"item": [
+				{
+					"name": "INGRESOS",
+					"item": [
+						{
+							"name": "Crear Ingreso - Salario Enero",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"INCOME\",\n    \"monto\": 3000000,\n    \"descripcion\": \"Pago de salario Enero 2026\",\n    \"fechaMovimiento\": \"2026-01-11\",\n    \"categoriaId\": null,\n    \"fuenteIngresoId\": 1,\n    \"metaId\": null,\n    \"esRecurrente\": true,\n    \"patronRecurrencia\": \"MENSUAL\",\n    \"notas\": \"Primer pago del año\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Ingreso - Freelance",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"INCOME\",\n    \"monto\": 1200000,\n    \"descripcion\": \"Proyecto web para cliente\",\n    \"fechaMovimiento\": \"2026-01-15\",\n    \"categoriaId\": null,\n    \"fuenteIngresoId\": 2,\n    \"metaId\": null,\n    \"esRecurrente\": false,\n    \"patronRecurrencia\": null,\n    \"notas\": \"Desarrollo página web\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Registros de ingresos"
+				},
+				{
+					"name": "GASTOS",
+					"item": [
+						{
+							"name": "Crear Gasto - Salida Novia",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"EXPENSE\",\n    \"monto\": 150000,\n    \"descripcion\": \"Salida con la novia - Cine y cena\",\n    \"fechaMovimiento\": \"2026-01-11\",\n    \"categoriaId\": 1,\n    \"fuenteIngresoId\": null,\n    \"metaId\": null,\n    \"esRecurrente\": false,\n    \"patronRecurrencia\": null,\n    \"notas\": \"Fecha romántica\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Gasto - Gasolina",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"EXPENSE\",\n    \"monto\": 80000,\n    \"descripcion\": \"Gasolina moto\",\n    \"fechaMovimiento\": \"2026-01-12\",\n    \"categoriaId\": 2,\n    \"fuenteIngresoId\": null,\n    \"metaId\": null,\n    \"esRecurrente\": false,\n    \"patronRecurrencia\": null,\n    \"notas\": \"Tanque lleno\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Gasto - Mercado",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"EXPENSE\",\n    \"monto\": 350000,\n    \"descripcion\": \"Mercado del mes\",\n    \"fechaMovimiento\": \"2026-01-10\",\n    \"categoriaId\": 3,\n    \"fuenteIngresoId\": null,\n    \"metaId\": null,\n    \"esRecurrente\": true,\n    \"patronRecurrencia\": \"MENSUAL\",\n    \"notas\": \"Supermercado\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Registros de gastos"
+				},
+				{
+					"name": "AHORROS",
+					"item": [
+						{
+							"name": "Crear Ahorro - Moto",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"SAVINGS\",\n    \"monto\": 500000,\n    \"descripcion\": \"Ahorro para la moto\",\n    \"fechaMovimiento\": \"2026-01-11\",\n    \"categoriaId\": null,\n    \"fuenteIngresoId\": null,\n    \"metaId\": 1,\n    \"esRecurrente\": true,\n    \"patronRecurrencia\": \"MENSUAL\",\n    \"notas\": \"Aporte mensual para la XR 190L\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Ahorro - PC Gamer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"usuarioId\": 1,\n    \"tipoMovimiento\": \"SAVINGS\",\n    \"monto\": 400000,\n    \"descripcion\": \"Ahorro para PC Gamer\",\n    \"fechaMovimiento\": \"2026-01-15\",\n    \"categoriaId\": null,\n    \"fuenteIngresoId\": null,\n    \"metaId\": 2,\n    \"esRecurrente\": true,\n    \"patronRecurrencia\": \"MENSUAL\",\n    \"notas\": \"Meta: PC Gamer\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Registros de ahorros vinculados a metas"
+				},
+				{
+					"name": "CONSULTAS",
+					"item": [
+						{
+							"name": "Obtener Todos los Movimientos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos/usuario/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos",
+										"usuario",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Solo INGRESOS",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos/usuario/1?tipo=INCOME",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos",
+										"usuario",
+										"1"
+									],
+									"query": [
+										{
+											"key": "tipo",
+											"value": "INCOME"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Solo GASTOS",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos/usuario/1?tipo=EXPENSE",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos",
+										"usuario",
+										"1"
+									],
+									"query": [
+										{
+											"key": "tipo",
+											"value": "EXPENSE"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Solo AHORROS",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos/usuario/1?tipo=SAVINGS",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos",
+										"usuario",
+										"1"
+									],
+									"query": [
+										{
+											"key": "tipo",
+											"value": "SAVINGS"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Por Rango de Fechas - Enero 2026",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos/usuario/1?fechaInicio=2026-01-01&fechaFin=2026-01-31",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos",
+										"usuario",
+										"1"
+									],
+									"query": [
+										{
+											"key": "fechaInicio",
+											"value": "2026-01-01"
+										},
+										{
+											"key": "fechaFin",
+											"value": "2026-01-31"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Por Categoría Específica",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/movimientos/usuario/1?categoriaId=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"movimientos",
+										"usuario",
+										"1"
+									],
+									"query": [
+										{
+											"key": "categoriaId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Consultas de movimientos con filtros"
+				}
+			],
+			"description": "Endpoints para gestión de movimientos financieros (ingresos, gastos, ahorros)"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "usuarioId",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
+
