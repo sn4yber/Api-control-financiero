@@ -1,0 +1,42 @@
+# Ignorar carpetas de build
+target/
+!target/*.jar
+
+# Ignorar IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Ignorar Git
+.git/
+.gitignore
+.gitattributes
+
+# Ignorar archivos de documentación
+README.md
+*.md
+docs/
+
+# Ignorar archivos de configuración local
+.env
+.env.local
+application-local.properties
+
+# Ignorar logs
+logs/
+*.log
+
+# Ignorar Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Ignorar node modules (si los hay)
+node_modules/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+

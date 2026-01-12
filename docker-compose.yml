@@ -1,0 +1,68 @@
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:17-alpine
+    container_name: control-financiero-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: control_financiero
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - control-financiero-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d control_financiero"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: control-financiero-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Base de datos
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/control_financiero
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+
+      # JPA/Hibernate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+
+      # Java Options
+      JAVA_OPTS: -Xms512m -Xmx1024m
+
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    networks:
+      - control-financiero-network
+    volumes:
+      - app-logs:/app/logs
+
+# Volúmenes persistentes
+volumes:
+  postgres-data:
+    driver: local
+  app-logs:
+    driver: local
+
+# Red personalizada
+networks:
+  control-financiero-network:
+    driver: bridge
+
