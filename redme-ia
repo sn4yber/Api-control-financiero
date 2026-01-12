@@ -1,0 +1,157 @@
+# 🤖 README-IA.md
+## Uso Responsable y Consciente de Inteligencia Artificial en el Proyecto
+
+---
+
+## 📌 Propósito
+
+Este proyecto utiliza herramientas de **Inteligencia Artificial (IA)** como apoyo al proceso de desarrollo de software.
+La IA **NO reemplaza** el criterio del desarrollador ni toma decisiones arquitectónicas finales.
+
+La IA es tratada como:
+> **Un asistente técnico controlado, no como un autor del sistema.**
+
+El objetivo de su uso es:
+- Aumentar productividad
+- Reducir tareas repetitivas
+- Apoyar la documentación y el razonamiento
+- Mantener coherencia arquitectónica
+- Preservar la calidad del diseño
+
+---
+
+## 🧠 Principios Rectores
+
+El uso de IA en este proyecto se rige por los principios de:
+
+### 📘 Clean Code (Robert C. Martin)
+- El código debe ser **legible antes que ingenioso**
+- Funciones pequeñas y con una sola responsabilidad
+- Nombres claros y expresivos
+- Evitar efectos colaterales
+- El código debe poder explicarse sin justificaciones externas
+
+### 📘 Clean Architecture
+- El dominio es el centro del sistema
+- Las dependencias siempre apuntan hacia adentro
+- Frameworks, bases de datos e IA son **detalles**
+- La lógica de negocio **no depende** de herramientas externas
+
+### 📘 The Pragmatic Programmer
+- DRY (Don’t Repeat Yourself)
+- Orthogonality (cambios locales, no en cascada)
+- Reversibility (decisiones no irreversibles)
+- Tracer Bullets (avanzar con estructura funcional)
+- Evitar la optimización prematura
+
+---
+
+## 🤖 Rol de la IA en el Proyecto
+
+La IA **puede ser utilizada** para:
+
+✅ Generar borradores de código
+✅ Proponer estructuras iniciales
+✅ Ayudar en documentación técnica
+✅ Sugerir refactorizaciones
+✅ Detectar posibles errores
+✅ Explicar conceptos o decisiones
+
+La IA **NO tiene autoridad técnica final**.
+
+---
+
+## 🚫 Prohibiciones Explícitas
+
+La IA **NO DEBE**, bajo ninguna circunstancia:
+
+❌ Crear archivos nuevos para “arreglar” errores sin autorización explícita
+❌ Duplicar clases, servicios o repositorios existentes
+❌ Introducir nuevas capas arquitectónicas innecesarias
+❌ Romper la arquitectura definida (Clean / Hexagonal)
+❌ Mezclar capas (domain ↔ infrastructure)
+❌ Agregar dependencias sin justificación técnica clara
+❌ Resolver problemas creando parches improvisados
+❌ Ocultar errores con soluciones superficiales
+
+> ⚠️ **Si algo no funciona, primero se entiende la causa raíz.
+> Luego se corrige.**
+
+---
+
+## 🧭 Regla de Oro para el Uso de IA
+
+Antes de integrar cualquier salida generada por IA, el desarrollador debe responder:
+
+1. ¿Respeta la arquitectura definida?
+2. ¿Introduce acoplamiento innecesario?
+3. ¿Este código es claro y mantenible?
+4. ¿Podría explicarlo a otra persona sin dificultad?
+5. ¿Simplifica el sistema o lo complica?
+6. ¿Estoy resolviendo el problema real?
+
+Si alguna respuesta es **NO**, el código **no debe integrarse**.
+
+---
+
+## 🧱 Arquitectura del Proyecto
+
+Este proyecto sigue una **Arquitectura Limpia / Hexagonal Pragmática**:
+
+- `domain` → reglas de negocio puras
+- `application` → casos de uso
+- `infrastructure` → detalles técnicos (Spring, DB, Web)
+- `shared` → utilidades transversales
+
+La IA **no puede alterar esta separación**.
+
+---
+
+## 🔁 Flujo Correcto de Uso de IA
+
+1️⃣ El desarrollador define el problema
+2️⃣ El desarrollador define el contexto arquitectónico
+3️⃣ La IA propone una solución
+4️⃣ El desarrollador evalúa críticamente
+5️⃣ El desarrollador adapta, refactoriza o descarta
+6️⃣ El código final es responsabilidad humana
+
+> La IA **asiste**.
+> El desarrollador **decide**.
+
+---
+
+## 🛑 Anti-Patrones de Uso de IA (Evitar)
+
+- “Que la IA lo arregle”
+- “Funciona, no sé cómo”
+- “La IA creó esta carpeta, déjala así”
+- “Copiar y pegar sin entender”
+- “Más archivos = mejor diseño”
+- “Después lo refactorizamos”
+
+Estos anti-patrones **degradan la calidad del proyecto**.
+
+---
+
+## 🧩 Responsabilidad Final
+
+Toda línea de código integrada en este proyecto:
+
+- Es comprendida por el desarrollador
+- Es mantenible
+- Es defendible técnicamente
+- Tiene un propósito claro dentro del sistema
+
+La responsabilidad **NO es de la IA**.
+La responsabilidad **es humana**.
+
+---
+
+## ✅ Declaración Final
+
+> **La IA es una herramienta poderosa.
+> El criterio humano es irremplazable.
+> Este proyecto prioriza claridad, diseño y sostenibilidad a largo plazo.**
+
+---

@@ -34,6 +34,11 @@ public interface FuenteIngresoRepository {
     List<FuenteIngreso> findActivasByUsuarioId(Long usuarioId);
 
     /**
+     * Lista fuentes de ingreso por usuario y estado activo.
+     */
+    List<FuenteIngreso> findByUsuarioIdAndActiva(Long usuarioId, boolean activa);
+
+    /**
      * Lista fuentes de ingreso de un usuario por tipo.
      */
     List<FuenteIngreso> findByUsuarioIdAndTipo(Long usuarioId, TipoFuente tipo);
