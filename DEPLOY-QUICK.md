@@ -1,6 +1,6 @@
 # 🚀 Deploy to Render - Quick Guide
 
-## ⚡ Ultra Quick Deploy (3 pasos)
+## ⚡ Ultra Quick Deploy (3 Steps)
 
 ### 1️⃣ Push to GitHub
 ```bash
@@ -9,13 +9,46 @@ git commit -m "feat: Add Render deployment"
 git push origin main
 ```
 
-### 2️⃣ Connect to Render
-1. Go to [dashboard.render.com](https://dashboard.render.com)
-2. Click **"New +"** → **"Blueprint"**
-3. Select your repository: `Api-control-financiero`
-4. Click **"Apply"**
+### 2️⃣ Create Web Service on Render
 
-### 3️⃣ Wait ~5 minutes
+1. Go to [dashboard.render.com](https://dashboard.render.com)
+2. Click **"New +"** → **"Web Service"**
+3. Connect your GitHub repository: `Api-control-financiero`
+4. Configure:
+   - **Name**: `control-financiero-api`
+   - **Runtime**: Docker
+   - **Branch**: main
+   - **Region**: Oregon
+   - **Plan**: Free
+
+5. **Environment Variables** (Add these):
+   
+   **⚠️ IMPORTANT: Copy ONLY the URL, NOT the 'psql' command!**
+   
+   ```
+   Key: DATABASE_URL
+   Value: postgresql://neondb_owner:npg_5OimKyqF9sIX@ep-dawn-unit-adn7096y-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
+   ```
+   *(Remove `&channel_binding=require` if present)*
+   
+   ```
+   Key: SPRING_PROFILES_ACTIVE
+   Value: prod
+   ```
+   
+   ```
+   Key: JAVA_OPTS
+   Value: -Xms256m -Xmx512m
+   ```
+   
+   **Common mistake:** Don't copy `psql 'postgresql://...'` - only copy the URL starting with `postgresql://`
+
+6. **Advanced Settings**:
+   - Health Check Path: `/actuator/health`
+
+7. Click **"Create Web Service"**
+
+### 3️⃣ Wait ~5-7 minutes
 Your API will be live at: `https://control-financiero-api.onrender.com`
 
 ---
