@@ -1,20 +1,32 @@
 # 🚨 ERROR COMÚN: URL de Base de Datos Incorrecta
 
-## ❌ ERROR
+## ✅ SOLUCIONADO AUTOMÁTICAMENTE (versión actual)
+
+**A partir del commit `4e4bcc7`**, la aplicación limpia automáticamente el parámetro `channel_binding` de la URL de Neon.
+
+**Ya NO necesitas** quitar manualmente `&channel_binding=require` - la aplicación lo hace por ti.
+
+---
+
+## ❌ ERRORES QUE TODAVÍA DEBES EVITAR
+
+### Error 1: Copiar el comando `psql` completo
 
 Si ves este error en Render:
 ```
 Driver org.postgresql.Driver claims to not accept jdbcUrl, psql 'postgresql://...
 ```
 
-## 🔍 CAUSA
+**Causa**: Copiaste **literalmente** `psql 'postgresql://...'` incluyendo la palabra `psql` y las comillas.
 
-Copiaste **literalmente** el comando de conexión de Neon, incluyendo:
-- La palabra `psql`
-- Las comillas `'`
-- Todo el comando completo
+**Solución**: Solo copia la URL sin `psql` ni comillas:
+```
+postgresql://neondb_owner:password@host/database?sslmode=require
+```
 
-## ✅ SOLUCIÓN
+---
+
+## 🔍 HISTÓRICO: channel_binding (YA SOLUCIONADO)
 
 ### Paso 1: Ve a Render Dashboard
 1. Abre tu Web Service

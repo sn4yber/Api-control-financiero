@@ -28,6 +28,12 @@ public class DataSourceConfig {
     public DataSource dataSource(DataSourceProperties properties) {
         String url = properties.getUrl();
 
+        // Agregar prefijo jdbc: si no está presente (Neon da postgresql:// pero JDBC necesita jdbc:postgresql://)
+        if (url != null && !url.startsWith("jdbc:") && url.startsWith("postgresql://")) {
+            url = "jdbc:" + url;
+            System.out.println("🔧 Agregado prefijo 'jdbc:' a la URL de base de datos");
+        }
+
         // Limpiar parámetros incompatibles que Neon puede agregar
         if (url != null && url.contains("channel_binding")) {
             // Remover &channel_binding=require o ?channel_binding=require
@@ -37,8 +43,9 @@ public class DataSourceConfig {
             url = url.replaceAll("&&", "&");
 
             System.out.println("🔧 URL de base de datos sanitizada (channel_binding removido)");
-            System.out.println("📍 URL limpia: " + url.replaceAll(":[^:@]+@", ":***@")); // Ocultar password en logs
         }
+
+        System.out.println("📍 URL final: " + (url != null ? url.replaceAll(":[^:@]+@", ":***@") : "null")); // Ocultar password en logs
 
         HikariDataSource dataSource = properties.initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
