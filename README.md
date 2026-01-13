@@ -17,7 +17,43 @@
 - [Stack Tecnológico](#-stack-tecnológico)
 - [Modelo de Dominio](#-modelo-de-dominio)
 - [API Endpoints](#-api-endpoints)
+- [Deployment](#-deployment)
 - [Estado del Proyecto](#-estado-del-proyecto)
+
+---
+
+## 🚀 Quick Start
+
+### Localmente con Docker
+
+```bash
+# Clonar repositorio
+git clone https://github.com/sn4yber/Api-control-financiero.git
+cd Api-control-financiero
+
+# Levantar con Docker Compose
+docker compose up -d
+
+# Ver logs
+docker compose logs -f
+
+# API disponible en http://localhost:8080
+```
+
+📖 **Guía completa**: [DOCKER-QUICKSTART.md](./DOCKER-QUICKSTART.md)
+
+### Deploy en Render (Gratis)
+
+```bash
+# 1. Push a GitHub
+git push origin main
+
+# 2. Conectar en Render Dashboard
+# 3. Configurar variables de entorno
+```
+
+📖 **Guía completa**: [DEPLOY-QUICK.md](./DEPLOY-QUICK.md)  
+🚨 **Problemas comunes**: [TROUBLESHOOT-DATABASE-URL.md](./TROUBLESHOOT-DATABASE-URL.md)
 
 ---
 
