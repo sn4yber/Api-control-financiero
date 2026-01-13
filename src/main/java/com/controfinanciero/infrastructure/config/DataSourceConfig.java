@@ -1,12 +1,12 @@
 package com.controfinanciero.infrastructure.config;
 
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -18,15 +18,8 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-    @ConfigurationProperties("spring.datasource")
-    public DataSourceProperties dataSourceProperties() {
-        return new DataSourceProperties();
-    }
-
-    @Bean
-    @Primary
-    public DataSource dataSource(DataSourceProperties properties) {
-        String url = properties.getUrl();
+    public DataSource dataSource(@Value("${DATABASE_URL:${spring.datasource.url}}") String databaseUrl) {
+        String url = databaseUrl;
 
         // Agregar prefijo jdbc: si no está presente (Neon da postgresql:// pero JDBC necesita jdbc:postgresql://)
         if (url != null && !url.startsWith("jdbc:") && url.startsWith("postgresql://")) {
@@ -47,13 +40,19 @@ public class DataSourceConfig {
 
         System.out.println("📍 URL final: " + (url != null ? url.replaceAll(":[^:@]+@", ":***@") : "null")); // Ocultar password en logs
 
-        HikariDataSource dataSource = properties.initializeDataSourceBuilder()
-                .type(HikariDataSource.class)
-                .build();
+        // Configurar HikariCP directamente
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setDriverClassName("org.postgresql.Driver");
 
-        dataSource.setJdbcUrl(url);
+        // Pool settings optimizados para Render Free tier
+        config.setMaximumPoolSize(5);
+        config.setMinimumIdle(2);
+        config.setConnectionTimeout(30000);
+        config.setIdleTimeout(600000);
+        config.setMaxLifetime(1800000);
 
-        return dataSource;
+        return new HikariDataSource(config);
     }
 }
 
