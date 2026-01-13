@@ -133,10 +133,22 @@ curl -X POST https://control-financiero-api.onrender.com/api/usuarios \
 
 ## 📊 COMMITS RELACIONADOS
 
-| Commit | Descripción |
-|--------|-------------|
-| `4e4bcc7` | Eliminar automáticamente `channel_binding` |
-| `20b51c7` | Agregar automáticamente prefijo `jdbc:` |
+| Commit | Descripción | Estado |
+|--------|-------------|--------|
+| `4e4bcc7` | Eliminar automáticamente `channel_binding` | ✅ Funcional |
+| `20b51c7` | Agregar automáticamente prefijo `jdbc:` | ⚠️ Conflicto |
+| `21b3846` | Simplificar config para evitar conflictos | ✅ **SOLUCIÓN FINAL** |
+
+### Problema del commit `20b51c7`:
+- Usaba `DataSourceProperties` + `initializeDataSourceBuilder()`
+- Luego sobrescribía con `setJdbcUrl()`
+- **Conflicto**: El driver recibía dos configuraciones diferentes
+
+### Solución del commit `21b3846`:
+- Elimina `DataSourceProperties`
+- Crea `HikariConfig` desde cero
+- Configura **solo** la URL sanitizada
+- **Sin conflictos**: Una sola fuente de verdad
 
 ---
 
