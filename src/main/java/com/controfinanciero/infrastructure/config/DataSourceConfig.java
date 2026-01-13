@@ -26,13 +26,21 @@ public class DataSourceConfig {
         String password = null;
 
         try {
-            // Agregar prefijo jdbc: si no está presente
+            // PASO 1: Limpiar parámetros incompatibles ANTES de parsear (channel_binding causa URISyntaxException)
+            if (url != null && url.contains("channel_binding")) {
+                url = url.replaceAll("[&?]channel_binding=[^&]*", "");
+                url = url.replaceAll("\\?&", "?");
+                url = url.replaceAll("&&", "&");
+                System.out.println("🔧 Parámetro channel_binding eliminado ANTES de parsear");
+            }
+
+            // PASO 2: Agregar prefijo jdbc: si no está presente
             if (url != null && !url.startsWith("jdbc:") && url.startsWith("postgresql://")) {
                 url = "jdbc:" + url;
                 System.out.println("🔧 Agregado prefijo 'jdbc:' a la URL de base de datos");
             }
 
-            // Parsear la URL para extraer usuario y password (formato Neon/Heroku)
+            // PASO 3: Parsear la URL para extraer usuario y password (formato Neon/Heroku)
             if (url != null && url.startsWith("jdbc:postgresql://")) {
                 URI uri = new URI(url.substring(5)); // Remove "jdbc:" prefix for parsing
 
@@ -52,19 +60,12 @@ public class DataSourceConfig {
                 }
             }
 
-            // Limpiar parámetros incompatibles que Neon puede agregar
-            if (url != null && url.contains("channel_binding")) {
-                url = url.replaceAll("[&?]channel_binding=[^&]*", "");
-                url = url.replaceAll("\\?&", "?");
-                url = url.replaceAll("&&", "&");
-                System.out.println("🔧 Parámetro channel_binding eliminado");
-            }
-
             System.out.println("📍 URL final: " + (url != null ? url.replaceAll(":[^:@]+@", ":***@") : "null"));
             System.out.println("👤 Usuario: " + (username != null ? username : "no extraído"));
 
         } catch (Exception e) {
             System.err.println("❌ Error parseando DATABASE_URL: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("No se pudo parsear DATABASE_URL", e);
         }
 
