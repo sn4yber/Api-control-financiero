@@ -135,20 +135,22 @@ curl -X POST https://control-financiero-api.onrender.com/api/usuarios \
 
 | Commit | Descripción | Estado |
 |--------|-------------|--------|
-| `4e4bcc7` | Eliminar automáticamente `channel_binding` | ✅ Funcional |
-| `20b51c7` | Agregar automáticamente prefijo `jdbc:` | ⚠️ Conflicto |
-| `21b3846` | Simplificar config para evitar conflictos | ✅ **SOLUCIÓN FINAL** |
+| `4e4bcc7` | Eliminar automáticamente `channel_binding` | ⚠️ Orden incorrecto |
+| `20b51c7` | Agregar automáticamente prefijo `jdbc:` | ⚠️ Conflicto con properties |
+| `21b3846` | Simplificar config para evitar conflictos | ⚠️ URI sin parsear credentials |
+| `41d0dd4` | Parsear DATABASE_URL para extraer credenciales | ⚠️ URISyntaxException por & |
+| `22ef2f4` | Limpiar channel_binding ANTES de parsear URI | ✅ **SOLUCIÓN FINAL** |
 
-### Problema del commit `20b51c7`:
-- Usaba `DataSourceProperties` + `initializeDataSourceBuilder()`
-- Luego sobrescribía con `setJdbcUrl()`
-- **Conflicto**: El driver recibía dos configuraciones diferentes
+### Evolución del problema:
 
-### Solución del commit `21b3846`:
-- Elimina `DataSourceProperties`
-- Crea `HikariConfig` desde cero
-- Configura **solo** la URL sanitizada
-- **Sin conflictos**: Una sola fuente de verdad
+1. **`4e4bcc7`**: Eliminaba `channel_binding` pero DESPUÉS de parsear → No funcionó
+2. **`20b51c7`**: Agregaba `jdbc:` pero con conflicto de DataSourceProperties
+3. **`21b3846`**: Simplificó config pero no extraía username/password correctamente
+4. **`41d0dd4`**: Parseaba credentials pero `&channel_binding` causaba `URISyntaxException`
+5. **`22ef2f4`**: **¡ORDEN CORRECTO!**
+   - Primero limpia `&channel_binding` ✅
+   - Luego agrega `jdbc:` prefix ✅  
+   - Finalmente parsea URI para extraer credentials ✅
 
 ---
 
