@@ -38,6 +38,13 @@ public interface UsuarioRepository {
     List<Usuario> findAllActive();
 
     /**
+     * Lista todos los usuarios activos (alias para compatibilidad con JPA).
+     */
+    default List<Usuario> findByActiveTrue() {
+        return findAllActive();
+    }
+
+    /**
      * Lista todos los usuarios (activos e inactivos).
      */
     List<Usuario> findAll();

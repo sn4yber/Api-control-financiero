@@ -117,6 +117,10 @@ public class Usuario {
         return active;
     }
 
+    public String getNombreCompleto() {
+        return fullName;
+    }
+
     // Setters (solo para infraestructura)
     protected void setId(Long id) {
         this.id = id;

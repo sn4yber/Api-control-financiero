@@ -20,7 +20,11 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-    public DataSource dataSource(@Value("${DATABASE_URL:${spring.datasource.url}}") String databaseUrl) {
+    public DataSource dataSource(
+            @Value("${DATABASE_URL:${spring.datasource.url}}") String databaseUrl,
+            @Value("${spring.datasource.username:}") String fallbackUsername,
+            @Value("${spring.datasource.password:}") String fallbackPassword
+    ) {
         String url = databaseUrl;
         String username = null;
         String password = null;
@@ -31,13 +35,13 @@ public class DataSourceConfig {
                 url = url.replaceAll("[&?]channel_binding=[^&]*", "");
                 url = url.replaceAll("\\?&", "?");
                 url = url.replaceAll("&&", "&");
-                System.out.println("🔧 Parámetro channel_binding eliminado ANTES de parsear");
+                System.out.println("🔧 Parámetro channel_binding eliminado");
             }
 
             // PASO 2: Agregar prefijo jdbc: si no está presente
             if (url != null && !url.startsWith("jdbc:") && url.startsWith("postgresql://")) {
                 url = "jdbc:" + url;
-                System.out.println("🔧 Agregado prefijo 'jdbc:' a la URL de base de datos");
+                System.out.println("🔧 Agregado prefijo 'jdbc:'");
             }
 
             // PASO 3: Parsear la URL para extraer usuario y password (formato Neon/Heroku)
@@ -56,12 +60,22 @@ public class DataSourceConfig {
                           uri.getPath() +
                           (uri.getQuery() != null ? "?" + uri.getQuery() : "");
 
-                    System.out.println("🔧 Usuario y password extraídos de la URL");
+                    System.out.println("🔧 Credenciales extraídas de URL");
                 }
             }
 
-            System.out.println("📍 URL final: " + (url != null ? url.replaceAll(":[^:@]+@", ":***@") : "null"));
-            System.out.println("👤 Usuario: " + (username != null ? username : "no extraído"));
+            // PASO 4: Si no se extrajeron de la URL, usar los de Spring Properties
+            if (username == null && fallbackUsername != null && !fallbackUsername.isEmpty()) {
+                username = fallbackUsername;
+                System.out.println("🔧 Usuario de spring.datasource.username");
+            }
+            if (password == null && fallbackPassword != null && !fallbackPassword.isEmpty()) {
+                password = fallbackPassword;
+                System.out.println("🔧 Password de spring.datasource.password");
+            }
+
+            System.out.println("📍 URL: " + (url != null ? url.replaceAll(":[^:@]+@", ":***@") : "null"));
+            System.out.println("👤 Usuario: " + (username != null ? username : "❌ NO CONFIGURADO"));
 
         } catch (Exception e) {
             System.err.println("❌ Error parseando DATABASE_URL: " + e.getMessage());

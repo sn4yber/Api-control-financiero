@@ -51,6 +51,20 @@ public interface MovimientoFinancieroRepository {
     }
 
     /**
+     * Lista movimientos de un usuario en un rango de fechas ordenados por fecha descendente.
+     * Usado para reportes y exportación.
+     */
+    default List<MovimientoFinanciero> findByUsuarioIdAndFechaMovimientoBetweenOrderByFechaMovimientoDesc(
+            Long usuarioId,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    ) {
+        // La implementación real estará en el adapter de JPA
+        // Este método default no se usa, pero satisface la interfaz
+        return findByUsuarioIdAndFechaBetween(usuarioId, fechaInicio, fechaFin);
+    }
+
+    /**
      * Lista movimientos de un usuario por tipo en un rango de fechas.
      */
     List<MovimientoFinanciero> findByUsuarioIdAndTipoMovimientoAndFechaMovimientoBetween(

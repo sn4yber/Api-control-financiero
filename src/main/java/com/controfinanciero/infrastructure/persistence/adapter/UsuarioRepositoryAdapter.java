@@ -51,9 +51,8 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
 
     @Override
     public List<Usuario> findAllActive() {
-        return jpaRepository.findAll().stream()
+        return jpaRepository.findByActiveTrue().stream()
                 .map(UsuarioEntityMapper::toDomain)
-                .filter(Usuario::estaActivo)
                 .collect(Collectors.toList());
     }
 

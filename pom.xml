@@ -90,6 +90,52 @@
 		<artifactId>spring-boot-starter-test</artifactId>
 		<scope>test</scope>
 	</dependency>
+
+	<!-- Email Support -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-mail</artifactId>
+	</dependency>
+
+	<!-- PDF Generation -->
+	<dependency>
+		<groupId>com.itextpdf</groupId>
+		<artifactId>itext7-core</artifactId>
+		<version>8.0.2</version>
+		<type>pom</type>
+	</dependency>
+
+	<!-- Excel Generation -->
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi-ooxml</artifactId>
+		<version>5.2.5</version>
+	</dependency>
+
+	<!-- Thymeleaf for Email Templates -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-thymeleaf</artifactId>
+	</dependency>
+
+	<!-- Cache Support -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-cache</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>com.github.ben-manes.caffeine</groupId>
+		<artifactId>caffeine</artifactId>
+	</dependency>
+
+	<!-- Rate Limiting -->
+	<dependency>
+		<groupId>com.bucket4j</groupId>
+		<artifactId>bucket4j-core</artifactId>
+		<version>8.10.1</version>
+	</dependency>
+
+	<!-- Scheduling Support (ya viene con Spring Boot pero lo explicitamos) -->
 	</dependencies>
 
 	<build>

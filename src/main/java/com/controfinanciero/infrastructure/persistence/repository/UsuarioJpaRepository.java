@@ -4,6 +4,7 @@ import com.controfinanciero.infrastructure.persistence.entity.UsuarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,5 +33,11 @@ public interface UsuarioJpaRepository extends JpaRepository<UsuarioEntity, Long>
      * Verifica si existe un usuario con ese username.
      */
     boolean existsByUsername(String username);
+
+    /**
+     * Lista todos los usuarios activos.
+     * Spring Data JPA genera automáticamente la query basada en el nombre del método.
+     */
+    List<UsuarioEntity> findByActiveTrue();
 }
 
