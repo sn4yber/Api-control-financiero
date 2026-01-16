@@ -40,6 +40,20 @@ public interface MovimientoFinancieroJpaRepository extends JpaRepository<Movimie
     );
 
     /**
+     * Busca movimientos de un usuario por tipo en un rango de fechas.
+     */
+    @Query("SELECT m FROM MovimientoFinancieroEntity m WHERE m.userId = :userId " +
+           "AND m.movementType = :movementType " +
+           "AND m.movementDate BETWEEN :startDate AND :endDate " +
+           "ORDER BY m.movementDate DESC")
+    List<MovimientoFinancieroEntity> findByUserIdAndMovementTypeAndDateRange(
+            @Param("userId") Long userId,
+            @Param("movementType") TipoMovimiento movementType,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    /**
      * Busca movimientos de un usuario por categoría.
      */
     List<MovimientoFinancieroEntity> findByUserIdAndCategoryId(Long userId, Long categoryId);

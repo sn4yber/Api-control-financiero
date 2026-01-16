@@ -9,10 +9,9 @@ import java.time.LocalDate;
 
 /**
  * Request para crear una meta financiera
+ * ✅ Sin usuarioId (se obtiene del token JWT)
  */
 public record CrearMetaFinancieraRequest(
-        @NotNull(message = "El ID de usuario es obligatorio")
-        Long usuarioId,
 
         @NotBlank(message = "El nombre es obligatorio")
         String nombre,

@@ -54,6 +54,14 @@ public class MovimientoFinancieroRepositoryAdapter implements MovimientoFinancie
     }
 
     @Override
+    public List<MovimientoFinanciero> findByUsuarioIdAndTipoMovimientoAndFechaMovimientoBetween(
+            Long usuarioId, TipoMovimiento tipo, LocalDate fechaInicio, LocalDate fechaFin) {
+        return jpaRepository.findByUserIdAndMovementTypeAndDateRange(usuarioId, tipo, fechaInicio, fechaFin).stream()
+                .map(MovimientoFinancieroEntityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<MovimientoFinanciero> findByUsuarioIdAndTipo(Long usuarioId, TipoMovimiento tipo) {
         return jpaRepository.findByUserIdAndMovementType(usuarioId, tipo).stream()
                 .map(MovimientoFinancieroEntityMapper::toDomain)

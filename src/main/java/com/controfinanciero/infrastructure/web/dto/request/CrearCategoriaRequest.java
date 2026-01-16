@@ -2,9 +2,10 @@ package com.controfinanciero.infrastructure.web.dto.request;
 import com.controfinanciero.domain.model.enums.TipoCategoria;
 import jakarta.validation.constraints.*;
 
+/**
+ * ✅ Sin usuarioId (se obtiene del token JWT)
+ */
 public record CrearCategoriaRequest(
-        @NotNull(message = "Usuario ID es requerido")
-        Long usuarioId,
 
         @NotBlank(message = "Nombre es requerido")
         @Size(max = 100, message = "El nombre no puede exceder 100 caracteres")

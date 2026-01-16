@@ -8,10 +8,9 @@ import java.time.LocalDate;
 
 /**
  * Request para crear un movimiento financiero
+ * ✅ Sin usuarioId (se obtiene del token JWT)
  */
 public record CrearMovimientoFinancieroRequest(
-        @NotNull(message = "El ID de usuario es obligatorio")
-        Long usuarioId,
 
         @NotNull(message = "El tipo de movimiento es obligatorio")
         TipoMovimiento tipoMovimiento,

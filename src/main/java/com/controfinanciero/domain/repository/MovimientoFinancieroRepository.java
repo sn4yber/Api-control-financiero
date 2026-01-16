@@ -40,6 +40,27 @@ public interface MovimientoFinancieroRepository {
     );
 
     /**
+     * Lista movimientos de un usuario en un rango de fechas (alias para consistencia).
+     */
+    default List<MovimientoFinanciero> findByUsuarioIdAndFechaMovimientoBetween(
+            Long usuarioId,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    ) {
+        return findByUsuarioIdAndFechaBetween(usuarioId, fechaInicio, fechaFin);
+    }
+
+    /**
+     * Lista movimientos de un usuario por tipo en un rango de fechas.
+     */
+    List<MovimientoFinanciero> findByUsuarioIdAndTipoMovimientoAndFechaMovimientoBetween(
+            Long usuarioId,
+            TipoMovimiento tipo,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    );
+
+    /**
      * Lista movimientos de un usuario por tipo.
      */
     List<MovimientoFinanciero> findByUsuarioIdAndTipo(Long usuarioId, TipoMovimiento tipo);
