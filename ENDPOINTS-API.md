@@ -6,6 +6,42 @@
 
 ---
 
+## 🔥 Keep-Alive & Monitoreo
+
+### Health Check
+```http
+GET /api/health
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "status": "UP",
+  "timestamp": "2026-01-22T10:30:45.123Z",
+  "database": "connected",
+  "uptime_seconds": 3600
+}
+```
+
+### Ping (Ultra-Ligero)
+```http
+GET /api/ping
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "status": "alive",
+  "timestamp": "2026-01-22T10:30:45.123Z",
+  "uptime_seconds": 3600
+}
+```
+
+> **💡 Nota:** Usa estos endpoints para mantener el servicio activo en Render Free Tier.  
+> Ver [KEEP-ALIVE-STRATEGY.md](./KEEP-ALIVE-STRATEGY.md) para implementación completa.
+
+---
+
 ## 🔐 Autenticación
 
 ### Login
