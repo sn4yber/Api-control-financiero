@@ -43,12 +43,21 @@ USER spring:spring
 # Puerto que expone la aplicación
 EXPOSE 8080
 
-# Variables de entorno por defecto (se pueden sobrescribir)
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
+# Variables de entorno optimizadas para arranque RÁPIDO en Render Free Tier
+ENV JAVA_OPTS="-XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=75.0 \
+    -XX:InitialRAMPercentage=50.0 \
+    -XX:+TieredCompilation \
+    -XX:TieredStopAtLevel=1 \
+    -Xverify:none \
+    -XX:+UseSerialGC \
+    -XX:+ExitOnOutOfMemoryError \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dspring.backgroundpreinitializer.ignore=true"
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+# Health check optimizado (verifica cada 15s, timeout 2s, start-period 30s)
+HEALTHCHECK --interval=15s --timeout=2s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 # Comando para ejecutar la aplicación

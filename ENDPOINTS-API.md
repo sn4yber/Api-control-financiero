@@ -6,6 +6,61 @@
 
 ---
 
+## 🔐 Autenticación
+
+### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "snayber",
+  "password": "123456"
+}
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "id": 1,
+  "username": "snayber",
+  "email": "snayber@example.com",
+  "fullName": "Snayber Dev"
+}
+```
+
+### Registro
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "snayber",
+  "email": "snayber@example.com",
+  "password": "123456",
+  "fullName": "Snayber Dev"
+}
+```
+
+**Respuesta (201 Created):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "id": 1,
+  "username": "snayber",
+  "email": "snayber@example.com",
+  "fullName": "Snayber Dev"
+}
+```
+
+**⚠️ Nota**: Después del login/registro, incluye el token en las peticiones:
+```http
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
 ## 👤 Usuarios
 
 ### Crear Usuario
@@ -466,6 +521,288 @@ GET /api/movimientos/usuario/{usuarioId}?categoriaId=1
 
 ---
 
+## 📄 Reportes y Exportación
+
+### Generar PDF (Estado de Cuenta)
+```http
+GET /api/reportes/pdf?fechaInicio=2026-01-01&fechaFin=2026-01-31
+Authorization: Bearer {token}
+```
+
+**Query Parameters:**
+- `fechaInicio` (requerido): Fecha inicial en formato YYYY-MM-DD
+- `fechaFin` (requerido): Fecha final en formato YYYY-MM-DD
+
+**Respuesta (200 OK):**
+- **Content-Type**: `application/pdf`
+- **Filename**: `estado-cuenta-{fechaInicio}-{fechaFin}.pdf`
+- Retorna un archivo PDF con el estado de cuenta del período
+
+**Características del PDF:**
+- ✅ Gráfico de ingresos vs gastos
+- ✅ Lista detallada de todos los movimientos
+- ✅ Totales y balance del período
+- ✅ Formato profesional con colores
+
+### Generar Excel
+```http
+GET /api/reportes/excel?fechaInicio=2026-01-01&fechaFin=2026-01-31
+Authorization: Bearer {token}
+```
+
+**Query Parameters:**
+- `fechaInicio` (requerido): Fecha inicial en formato YYYY-MM-DD
+- `fechaFin` (requerido): Fecha final en formato YYYY-MM-DD
+
+**Respuesta (200 OK):**
+- **Content-Type**: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- **Filename**: `reporte-financiero-{fechaInicio}-{fechaFin}.xlsx`
+- Retorna un archivo Excel con el reporte financiero
+
+**Características del Excel:**
+- ✅ Hoja de movimientos con todos los detalles
+- ✅ Fórmulas automáticas para totales
+- ✅ Formato profesional con colores
+- ✅ Fácil de analizar en Excel/Google Sheets
+
+---
+
+## 🧠 Inteligencia Financiera
+
+### Predicción de Gastos
+```http
+GET /api/inteligencia/prediccion
+Authorization: Bearer {token}
+```
+
+**Qué hace:**
+- Analiza tus últimos 6 meses de gastos
+- Calcula el promedio histórico
+- Proyecta cuánto gastarás este mes basado en tu ritmo actual
+
+**Respuesta (200 OK):**
+```json
+{
+  "promedioMensualHistorico": 2500000,
+  "gastoActualMes": 1800000,
+  "proyeccionFinMes": 3200000,
+  "diasTranscurridos": 20,
+  "diasTotalesMes": 31,
+  "mensaje": "Proyectas gastar $3,200,000 este mes. Tu promedio histórico es $2,500,000"
+}
+```
+
+### Detección de Anomalías
+```http
+GET /api/inteligencia/anomalias
+Authorization: Bearer {token}
+```
+
+**Qué hace:**
+- Detecta gastos inusualmente altos usando algoritmos estadísticos (desviaciones estándar)
+- Te alerta sobre movimientos sospechosos o extraordinarios
+
+**Ejemplo:** Si normalmente gastas $50,000 en comida y de repente gastas $300,000, lo detecta.
+
+**Respuesta (200 OK):**
+```json
+[
+  {
+    "id": 45,
+    "usuarioId": 1,
+    "tipoMovimiento": "EXPENSE",
+    "monto": 300000,
+    "descripcion": "Cena romántica especial",
+    "fechaMovimiento": "2026-01-15",
+    "categoriaId": 2,
+    "categoriaNombre": "Alimentación",
+    "esAnomalia": true
+  }
+]
+```
+
+### Recomendaciones Personalizadas
+```http
+GET /api/inteligencia/recomendaciones
+Authorization: Bearer {token}
+```
+
+**Qué hace:**
+- Analiza tu comportamiento financiero
+- Te da consejos personalizados para ayudarte a ahorrar
+
+**Respuesta (200 OK):**
+```json
+{
+  "recomendaciones": [
+    "⚠️ Tus gastos proyectados ($3,200,000) superan tu promedio histórico ($2,500,000). Considera revisar tus gastos.",
+    "🚨 Detectamos gastos inusualmente altos en los últimos 3 meses. Revisa si son necesarios.",
+    "💰 Podrías ahorrar $700,000 este mes reduciendo gastos en Ocio ($200,000) y Alimentación ($500,000)."
+  ],
+  "total": 3
+}
+```
+
+### Dashboard de Inteligencia Completo
+```http
+GET /api/inteligencia/dashboard
+Authorization: Bearer {token}
+```
+
+**Qué incluye:**
+- Predicciones de gastos
+- Anomalías detectadas
+- Recomendaciones personalizadas
+- Análisis completo
+
+**Respuesta (200 OK):**
+```json
+{
+  "prediccion": {
+    "promedioMensualHistorico": 2500000,
+    "gastoActualMes": 1800000,
+    "proyeccionFinMes": 3200000,
+    "diasTranscurridos": 20,
+    "diasTotalesMes": 31,
+    "mensaje": "Proyectas gastar $3,200,000 este mes. Tu promedio histórico es $2,500,000"
+  },
+  "anomalias": [
+    {
+      "id": 45,
+      "monto": 300000,
+      "descripcion": "Cena romántica especial",
+      "fechaMovimiento": "2026-01-15"
+    }
+  ],
+  "recomendaciones": [
+    "⚠️ Tus gastos proyectados superan tu promedio histórico. Considera revisar tus gastos.",
+    "💰 Podrías ahorrar $700,000 este mes reduciendo gastos en Ocio y Alimentación."
+  ]
+}
+```
+
+---
+
+## 🔔 Notificaciones
+
+### Obtener Todas las Notificaciones
+```http
+GET /api/notificaciones
+Authorization: Bearer {token}
+```
+
+**Respuesta (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "usuarioId": 1,
+    "tipoNotificacion": "PRESUPUESTO_ALERTA",
+    "titulo": "⚠️ Alerta de Presupuesto",
+    "mensaje": "Estás cerca del límite de tu presupuesto en Ocio (80% usado)",
+    "leida": false,
+    "createdAt": "2026-01-15T10:30:00"
+  },
+  {
+    "id": 2,
+    "usuarioId": 1,
+    "tipoNotificacion": "META_ALCANZADA",
+    "titulo": "🎉 Meta Completada",
+    "mensaje": "¡Felicidades! Has alcanzado tu meta 'Comprar Moto XR 190L'",
+    "leida": true,
+    "createdAt": "2026-01-14T18:20:00"
+  }
+]
+```
+
+**Tipos de Notificaciones:**
+- `PRESUPUESTO_WARNING`: Se envía cuando gastas el 80% del presupuesto
+- `PRESUPUESTO_ALERTA`: Se envía cuando excedes el presupuesto
+- `MOVIMIENTO_AUTOMATICO`: Se envía cuando se ejecuta un movimiento recurrente automáticamente
+- `RESUMEN_MENSUAL`: Se envía cada mes con tu resumen financiero
+- `META_ALCANZADA`: Se envía cuando alcanzas una meta financiera
+
+### Obtener Notificaciones No Leídas
+```http
+GET /api/notificaciones/no-leidas
+Authorization: Bearer {token}
+```
+
+**Respuesta (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "usuarioId": 1,
+    "tipoNotificacion": "PRESUPUESTO_ALERTA",
+    "titulo": "⚠️ Alerta de Presupuesto",
+    "mensaje": "Estás cerca del límite de tu presupuesto en Ocio (80% usado)",
+    "leida": false,
+    "createdAt": "2026-01-15T10:30:00"
+  }
+]
+```
+
+### Obtener Contador de No Leídas
+```http
+GET /api/notificaciones/contador
+Authorization: Bearer {token}
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "noLeidas": 5
+}
+```
+
+### Marcar Notificación como Leída
+```http
+PUT /api/notificaciones/{id}/marcar-leida
+Authorization: Bearer {token}
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "id": 1,
+  "usuarioId": 1,
+  "tipoNotificacion": "PRESUPUESTO_ALERTA",
+  "titulo": "⚠️ Alerta de Presupuesto",
+  "mensaje": "Estás cerca del límite de tu presupuesto en Ocio (80% usado)",
+  "leida": true,
+  "createdAt": "2026-01-15T10:30:00"
+}
+```
+
+### Marcar Todas como Leídas
+```http
+PUT /api/notificaciones/marcar-todas-leidas
+Authorization: Bearer {token}
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "mensaje": "5 notificaciones marcadas como leídas"
+}
+```
+
+### Eliminar Notificación
+```http
+DELETE /api/notificaciones/{id}
+Authorization: Bearer {token}
+```
+
+**Respuesta (200 OK):**
+```json
+{
+  "mensaje": "Notificación eliminada"
+}
+```
+
+---
+
 ## 📊 Ejemplos de Uso con React
 
 ### Configuración de Axios
@@ -549,6 +886,138 @@ export const useMovimientos = (usuarioId, filtros = {}) => {
   }, [usuarioId, JSON.stringify(filtros)]);
 
   return { movimientos, loading, error };
+};
+```
+
+### Descargar PDF
+```javascript
+const descargarPDF = async (fechaInicio, fechaFin) => {
+  try {
+    const response = await api.get('/reportes/pdf', {
+      params: { fechaInicio, fechaFin },
+      responseType: 'blob', // Importante para archivos binarios
+    });
+    
+    // Crear un enlace de descarga
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `estado-cuenta-${fechaInicio}-${fechaFin}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Error al descargar PDF:', error);
+    throw error;
+  }
+};
+```
+
+### Obtener Dashboard de Inteligencia
+```javascript
+const obtenerDashboard = async () => {
+  try {
+    const response = await api.get('/inteligencia/dashboard');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener dashboard:', error);
+    throw error;
+  }
+};
+
+// Hook personalizado
+export const useDashboardInteligencia = () => {
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        const data = await obtenerDashboard();
+        setDashboard(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  return { dashboard, loading };
+};
+```
+
+### Gestionar Notificaciones
+```javascript
+// Obtener notificaciones no leídas
+const obtenerNoLeidas = async () => {
+  try {
+    const response = await api.get('/notificaciones/no-leidas');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener notificaciones:', error);
+    throw error;
+  }
+};
+
+// Marcar como leída
+const marcarLeida = async (id) => {
+  try {
+    const response = await api.put(`/notificaciones/${id}/marcar-leida`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al marcar notificación:', error);
+    throw error;
+  }
+};
+
+// Hook personalizado para notificaciones
+export const useNotificaciones = () => {
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [contador, setContador] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchNotificaciones = async () => {
+    try {
+      setLoading(true);
+      const [noLeidas, count] = await Promise.all([
+        api.get('/notificaciones/no-leidas'),
+        api.get('/notificaciones/contador')
+      ]);
+      setNotificaciones(noLeidas.data);
+      setContador(count.data.noLeidas);
+    } catch (error) {
+      console.error('Error al obtener notificaciones:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotificaciones();
+  }, []);
+
+  const marcarComoLeida = async (id) => {
+    await marcarLeida(id);
+    fetchNotificaciones(); // Actualizar lista
+  };
+
+  const marcarTodasLeidas = async () => {
+    await api.put('/notificaciones/marcar-todas-leidas');
+    fetchNotificaciones(); // Actualizar lista
+  };
+
+  return { 
+    notificaciones, 
+    contador, 
+    loading, 
+    marcarComoLeida,
+    marcarTodasLeidas,
+    refetch: fetchNotificaciones
+  };
 };
 ```
 
