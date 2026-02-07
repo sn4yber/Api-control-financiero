@@ -847,6 +847,188 @@ const MetaCompartidaScreen = ({ metaId }) => {
 
 ---
 
+## 7. 🔔 NOTIFICACIONES
+
+### 7.1 Obtener Todas las Notificaciones
+
+**Endpoint:** `GET /api/notificaciones`
+
+**Autenticación:** ✅ Requerida
+
+**Respuesta exitosa (200):**
+```json
+[
+  {
+    "id": 1,
+    "usuarioId": 123,
+    "tipo": "META_COMPARTIDA",
+    "titulo": "🤝 Invitación a Meta Compartida",
+    "mensaje": "john_doe te ha invitado a colaborar en 'Vacaciones 2026'",
+    "leida": false,
+    "fechaEnvio": "2026-02-08T03:54:49",
+    "createdAt": "2026-02-08T03:54:49",
+    "metaId": 1,
+    "usuarioInvitador": "john_doe",
+    "metaNombre": "Vacaciones 2026",
+    "version": "1.6.0"
+  }
+]
+```
+
+---
+
+### 7.2 Obtener Notificaciones No Leídas
+
+**Endpoint:** `GET /api/notificaciones/no-leidas`
+
+**Autenticación:** ✅ Requerida
+
+**Respuesta:** Igual a 7.1, solo notificaciones con `leida: false`
+
+---
+
+### 7.3 Contador de No Leídas
+
+**Endpoint:** `GET /api/notificaciones/contador`
+
+**Autenticación:** ✅ Requerida
+
+**Respuesta exitosa (200):**
+```json
+{
+  "noLeidas": 5
+}
+```
+
+---
+
+### 7.4 Marcar como Leída
+
+**Endpoint:** `PUT /api/notificaciones/{id}/marcar-leida`
+
+**Autenticación:** ✅ Requerida
+
+**Path Parameters:**
+- `id` (number): ID de la notificación
+
+**Respuesta exitosa (200):**
+```json
+{
+  "id": 1,
+  "leida": true,
+  ...
+}
+```
+
+---
+
+### 7.5 Marcar Todas como Leídas
+
+**Endpoint:** `PUT /api/notificaciones/marcar-todas-leidas`
+
+**Autenticación:** ✅ Requerida
+
+**Respuesta exitosa (200):**
+```json
+{
+  "mensaje": "5 notificaciones marcadas como leídas"
+}
+```
+
+---
+
+### 7.6 Eliminar Notificación
+
+**Endpoint:** `DELETE /api/notificaciones/{id}`
+
+**Autenticación:** ✅ Requerida
+
+**Path Parameters:**
+- `id` (number): ID de la notificación
+
+**Respuesta exitosa (200):**
+```json
+{
+  "mensaje": "Notificación eliminada"
+}
+```
+
+---
+
+### 7.7 Limpiar Notificaciones Antiguas ⭐ NUEVO
+
+**Endpoint:** `DELETE /api/notificaciones/limpiar-antiguas`
+
+**Autenticación:** ✅ Requerida
+
+**Descripción:** Elimina notificaciones sin metadata (pre-v1.6.0) que no tienen `metaId`, `usuarioInvitador`, etc.
+
+**Respuesta exitosa (200):**
+```json
+{
+  "mensaje": "Notificaciones antiguas eliminadas",
+  "cantidad": 12,
+  "version": "1.6.0"
+}
+```
+
+**Uso recomendado:**
+- Llamar al iniciar la app por primera vez después de actualizar
+- Llamar si hay errores con notificaciones antiguas
+- Limpia el cache de notificaciones obsoletas
+
+**Ejemplo de uso:**
+```javascript
+// Al iniciar la app (una sola vez)
+const limpiarNotificacionesAntiguas = async () => {
+  try {
+    const { data } = await api.delete('/notificaciones/limpiar-antiguas');
+    console.log(`✅ ${data.cantidad} notificaciones antiguas eliminadas`);
+  } catch (error) {
+    console.error('Error limpiando notificaciones:', error);
+  }
+};
+
+// Llamar solo si la versión cambió
+const APP_VERSION = '1.6.0';
+const lastVersion = await AsyncStorage.getItem('lastAppVersion');
+if (lastVersion !== APP_VERSION) {
+  await limpiarNotificacionesAntiguas();
+  await AsyncStorage.setItem('lastAppVersion', APP_VERSION);
+}
+```
+
+---
+
+### 📱 Estructura de Notificación v1.6.0
+
+**Todos los tipos de notificación ahora incluyen:**
+- `version` (string): Versión del formato ("1.6.0")
+
+**Notificaciones de META_COMPARTIDA incluyen:**
+- `metaId` (number): ID de la meta para aceptar/rechazar
+- `usuarioInvitador` (string): Username de quien invita
+- `metaNombre` (string): Nombre de la meta
+
+**Validación en frontend:**
+```javascript
+const esNotificacionValida = (notif) => {
+  // Verificar que tenga versión
+  if (!notif.version || notif.version !== '1.6.0') {
+    return false;
+  }
+  
+  // Si es META_COMPARTIDA, verificar metadata
+  if (notif.tipo === 'META_COMPARTIDA') {
+    return notif.metaId && notif.usuarioInvitador && notif.metaNombre;
+  }
+  
+  return true;
+};
+```
+
+---
+
 ## 📊 INFORMACIÓN ADICIONAL
 
 ### Rate Limiting

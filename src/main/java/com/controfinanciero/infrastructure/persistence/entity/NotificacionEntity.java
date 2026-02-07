@@ -52,11 +52,16 @@ public class NotificacionEntity {
     @Column(name = "meta_nombre", length = 200)
     private String metaNombre;
 
+    // Versión del formato de notificación (para invalidar notificaciones antiguas)
+    @Column(name = "version", length = 10)
+    private String version = "1.6.0";
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (leida == null) leida = false;
         if (fechaEnvio == null) fechaEnvio = LocalDateTime.now();
+        if (version == null) version = "1.6.0";
     }
 }
 

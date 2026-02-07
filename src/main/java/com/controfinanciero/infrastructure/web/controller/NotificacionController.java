@@ -128,5 +128,33 @@ public class NotificacionController {
 
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 🧹 DELETE /api/notificaciones/limpiar-antiguas
+     * Elimina notificaciones antiguas sin metadata (pre-v1.6.0)
+     */
+    @DeleteMapping("/limpiar-antiguas")
+    public ResponseEntity<Map<String, Object>> limpiarNotificacionesAntiguas() {
+        Usuario usuario = authService.getCurrentUser();
+
+        // Obtener todas las notificaciones del usuario
+        List<NotificacionEntity> todasNotificaciones = notificacionRepo
+                .findByUsuarioIdOrderByCreatedAtDesc(usuario.getId());
+
+        // Filtrar y eliminar las que no tienen version o son pre-1.6.0
+        long eliminadas = todasNotificaciones.stream()
+                .filter(n -> n.getVersion() == null ||
+                            n.getVersion().isEmpty() ||
+                            !n.getVersion().equals("1.6.0"))
+                .peek(notificacionRepo::delete)
+                .count();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("mensaje", "Notificaciones antiguas eliminadas");
+        response.put("cantidad", eliminadas);
+        response.put("version", "1.6.0");
+
+        return ResponseEntity.ok(response);
+    }
 }
 
