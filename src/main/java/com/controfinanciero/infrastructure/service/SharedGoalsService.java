@@ -83,5 +83,9 @@ public class SharedGoalsService {
     public List<MetaColaboradorEntity> obtenerColaboradores(Long metaId) {
         return colaboradorRepository.findByMetaId(metaId);
     }
+
+    public List<MetaColaboradorEntity> obtenerMisColaboraciones(Long usuarioId) {
+        return colaboradorRepository.findByUsuarioId(usuarioId);
+    }
 }
 

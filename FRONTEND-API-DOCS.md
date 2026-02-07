@@ -443,14 +443,16 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 
 ## 5. 🤝 METAS COMPARTIDAS
 
-### 5.1 Compartir Meta
+**✅ IMPLEMENTADO - Endpoints funcionales**
 
-**Endpoint:** `POST /api/metas/{id}/compartir`
+### 5.1 Compartir Meta con Otro Usuario
+
+**Endpoint:** `POST /api/metas-compartidas/{metaId}/compartir`
 
 **Autenticación:** ✅ Requerida
 
 **Path Parameters:**
-- `id` (number): ID de la meta a compartir
+- `metaId` (number): ID de la meta a compartir
 
 **Body (application/json):**
 ```json
@@ -459,9 +461,10 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 }
 ```
 
-**Nota:** Por ahora se requiere el ID del usuario. En futuras versiones se implementará búsqueda por email.
+**Campos obligatorios:**
+- `usuarioInvitadoId` (number): ID del usuario con quien compartir
 
-**Respuesta exitosa (200):**
+**Respuesta exitosa (201 Created):**
 ```json
 {
   "id": 10,
@@ -477,20 +480,26 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 ```
 
 **Validaciones:**
-- Usuario debe ser dueño de la meta
-- No se puede compartir con uno mismo
-- Usuario invitado debe existir
+- ✅ Usuario debe ser dueño de la meta
+- ✅ No se puede compartir con uno mismo
+- ✅ Usuario invitado debe existir
+- ✅ Se envía notificación automática al invitado
+
+**Errores posibles:**
+- `404` - Meta no encontrada
+- `403` - No eres dueño de esta meta
+- `400` - Usuario invitado no existe
 
 ---
 
-### 5.2 Aportar a Meta Compartida
+### 5.2 Realizar Aporte a Meta Compartida
 
-**Endpoint:** `POST /api/metas/{id}/aportar`
+**Endpoint:** `POST /api/metas-compartidas/{metaId}/aportar`
 
 **Autenticación:** ✅ Requerida
 
 **Path Parameters:**
-- `id` (number): ID de la meta
+- `metaId` (number): ID de la meta
 
 **Body (application/json):**
 ```json
@@ -501,7 +510,7 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 ```
 
 **Campos obligatorios:**
-- `monto` (number): Monto a aportar
+- `monto` (number): Monto a aportar (debe ser > 0)
 
 **Campos opcionales:**
 - `descripcion` (string): Descripción del aporte
@@ -510,22 +519,26 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 ```json
 {
   "mensaje": "Aporte registrado exitosamente",
-  "nuevoTotal": 5500.00
+  "monto": 1000.00
 }
 ```
 
-**Nota:** También crea un movimiento de tipo SAVINGS vinculado a la meta.
+**Comportamiento:**
+- ✅ Suma el aporte al total del colaborador
+- ✅ Actualiza porcentaje de aporte automáticamente
+- ✅ Notifica a otros colaboradores del aporte
+- ✅ Crea movimiento de tipo SAVINGS vinculado a la meta
 
 ---
 
-### 5.3 Ver Colaboradores de Meta
+### 5.3 Ver Colaboradores de una Meta
 
-**Endpoint:** `GET /api/metas/{id}/colaboradores`
+**Endpoint:** `GET /api/metas-compartidas/{metaId}/colaboradores`
 
 **Autenticación:** ✅ Requerida
 
 **Path Parameters:**
-- `id` (number): ID de la meta
+- `metaId` (number): ID de la meta
 
 **Respuesta exitosa (200):**
 ```json
@@ -553,6 +566,134 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
     "aceptadoAt": "2026-01-15T11:30:00Z"
   }
 ]
+```
+
+**Campos importantes:**
+- `esCreador` (boolean): Si es el dueño original de la meta
+- `aporteTotal` (number): Total aportado por este colaborador
+- `porcentajeAporte` (number): % del total aportado
+- `aceptadoAt` (datetime): Cuándo aceptó la invitación (null si no ha aceptado)
+
+---
+
+### 5.4 Obtener Mis Metas Compartidas
+
+**Endpoint:** `GET /api/metas-compartidas/mis-metas`
+
+**Autenticación:** ✅ Requerida
+
+**Descripción:** Devuelve todas las metas donde el usuario es colaborador (propias y compartidas con él)
+
+**Respuesta exitosa (200):**
+```json
+[
+  {
+    "id": 15,
+    "metaId": 5,
+    "usuarioId": 123,
+    "esCreador": false,
+    "aporteTotal": 1500.00,
+    "porcentajeAporte": 30.0,
+    "activo": true,
+    "invitadoAt": "2026-02-01T10:00:00Z",
+    "aceptadoAt": "2026-02-01T11:30:00Z"
+  }
+]
+```
+
+---
+
+### 📱 Ejemplo de Integración en React Native
+
+```javascript
+// services/metasCompartidasService.js
+import api from './api';
+
+export const metasCompartidasService = {
+  // Compartir meta con otro usuario
+  compartirMeta: async (metaId, usuarioInvitadoId) => {
+    const response = await api.post(
+      `/metas-compartidas/${metaId}/compartir`,
+      { usuarioInvitadoId }
+    );
+    return response.data;
+  },
+
+  // Realizar un aporte
+  aportar: async (metaId, monto, descripcion = '') => {
+    const response = await api.post(
+      `/metas-compartidas/${metaId}/aportar`,
+      { monto, descripcion }
+    );
+    return response.data;
+  },
+
+  // Ver colaboradores
+  getColaboradores: async (metaId) => {
+    const response = await api.get(
+      `/metas-compartidas/${metaId}/colaboradores`
+    );
+    return response.data;
+  },
+
+  // Mis metas compartidas
+  getMisMetasCompartidas: async () => {
+    const response = await api.get('/metas-compartidas/mis-metas');
+    return response.data;
+  }
+};
+```
+
+### 🎨 Ejemplo de UI
+
+```javascript
+// screens/MetaCompartidaScreen.js
+import { useState, useEffect } from 'react';
+import { metasCompartidasService } from '../services';
+
+const MetaCompartidaScreen = ({ metaId }) => {
+  const [colaboradores, setColaboradores] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadColaboradores();
+  }, [metaId]);
+
+  const loadColaboradores = async () => {
+    try {
+      const data = await metasCompartidasService.getColaboradores(metaId);
+      setColaboradores(data);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAportar = async () => {
+    try {
+      await metasCompartidasService.aportar(metaId, 500, 'Aporte rápido');
+      Alert.alert('✅', 'Aporte registrado exitosamente');
+      loadColaboradores(); // Recargar datos
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
+  return (
+    <View>
+      <Text style={styles.title}>Colaboradores</Text>
+      {colaboradores.map(col => (
+        <View key={col.id} style={styles.colaborador}>
+          <Text>{col.esCreador ? '👑' : '🤝'} Usuario #{col.usuarioId}</Text>
+          <Text>Aportado: ${col.aporteTotal}</Text>
+          <Text>Porcentaje: {col.porcentajeAporte}%</Text>
+        </View>
+      ))}
+      <Button title="Aportar $500" onPress={handleAportar} />
+    </View>
+  );
+};
 ```
 
 ---
