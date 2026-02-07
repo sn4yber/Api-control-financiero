@@ -59,6 +59,45 @@ public class NotificationService {
     }
 
     /**
+     * Crea una notificación con metadata adicional (metaId, usuarioInvitador, etc.)
+     */
+    @Transactional
+    public NotificacionEntity crearNotificacionConMetadata(
+            Long usuarioId,
+            String tipo,
+            String titulo,
+            String mensaje,
+            java.util.Map<String, Object> metadata
+    ) {
+        NotificacionEntity notificacion = new NotificacionEntity();
+        notificacion.setUsuarioId(usuarioId);
+        notificacion.setTipo(tipo);
+        notificacion.setTitulo(titulo);
+        notificacion.setMensaje(mensaje);
+        notificacion.setLeida(false);
+        notificacion.setFechaEnvio(LocalDateTime.now());
+
+        // Agregar metadata como campos adicionales
+        if (metadata != null) {
+            if (metadata.containsKey("metaId")) {
+                notificacion.setMetaId((Long) metadata.get("metaId"));
+            }
+            if (metadata.containsKey("usuarioInvitador")) {
+                notificacion.setUsuarioInvitador((String) metadata.get("usuarioInvitador"));
+            }
+            if (metadata.containsKey("metaNombre")) {
+                notificacion.setMetaNombre((String) metadata.get("metaNombre"));
+            }
+        }
+
+        NotificacionEntity saved = notificacionRepository.save(notificacion);
+        log.info("📬 Notificación con metadata creada - Usuario: {}, Tipo: {}, MetaId: {}",
+                usuarioId, tipo, metadata.get("metaId"));
+
+        return saved;
+    }
+
+    /**
      * 🚨 Alerta: Presupuesto excedido
      */
     @Transactional

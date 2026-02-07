@@ -42,6 +42,16 @@ public class NotificacionEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // Metadata adicional para notificaciones de metas compartidas
+    @Column(name = "meta_id")
+    private Long metaId;
+
+    @Column(name = "usuario_invitador", length = 100)
+    private String usuarioInvitador;
+
+    @Column(name = "meta_nombre", length = 200)
+    private String metaNombre;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

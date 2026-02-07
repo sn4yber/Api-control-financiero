@@ -25,7 +25,7 @@ public class MetasCompartidasController {
 
     /**
      * POST /api/metas-compartidas/{metaId}/compartir
-     * Compartir una meta con otro usuario
+     * Compartir una meta con otro usuario por username
      */
     @PostMapping("/{metaId}/compartir")
     public ResponseEntity<?> compartirMeta(
@@ -34,10 +34,11 @@ public class MetasCompartidasController {
 
         Usuario usuario = authService.getCurrentUser();
 
-        MetaColaboradorEntity colaborador = sharedGoalsService.compartirMeta(
+        MetaColaboradorEntity colaborador = sharedGoalsService.compartirMetaPorUsername(
                 metaId,
                 usuario.getId(),
-                request.usuarioInvitadoId()
+                usuario.getUsername(),
+                request.usernameInvitado()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(colaborador);
@@ -91,8 +92,56 @@ public class MetasCompartidasController {
         return ResponseEntity.ok(misColaboraciones);
     }
 
+    /**
+     * POST /api/metas-compartidas/{metaId}/aceptar
+     * Aceptar invitación a meta compartida
+     */
+    @PostMapping("/{metaId}/aceptar")
+    public ResponseEntity<?> aceptarInvitacion(@PathVariable Long metaId) {
+        Usuario usuario = authService.getCurrentUser();
+        sharedGoalsService.aceptarInvitacion(metaId, usuario.getId());
+
+        return ResponseEntity.ok(new MensajeResponse(
+                "Invitación aceptada exitosamente",
+                null
+        ));
+    }
+
+    /**
+     * DELETE /api/metas-compartidas/{metaId}/salir
+     * Salir de una meta compartida
+     */
+    @DeleteMapping("/{metaId}/salir")
+    public ResponseEntity<?> salirDeMeta(@PathVariable Long metaId) {
+        Usuario usuario = authService.getCurrentUser();
+        sharedGoalsService.salirDeMeta(metaId, usuario.getId());
+
+        return ResponseEntity.ok(new MensajeResponse(
+                "Has salido de la meta compartida",
+                null
+        ));
+    }
+
+    /**
+     * DELETE /api/metas-compartidas/{metaId}/colaborador/{colaboradorId}
+     * Eliminar colaborador de una meta (solo creador)
+     */
+    @DeleteMapping("/{metaId}/colaborador/{colaboradorId}")
+    public ResponseEntity<?> eliminarColaborador(
+            @PathVariable Long metaId,
+            @PathVariable Long colaboradorId) {
+
+        Usuario usuario = authService.getCurrentUser();
+        sharedGoalsService.eliminarColaborador(metaId, usuario.getId(), colaboradorId);
+
+        return ResponseEntity.ok(new MensajeResponse(
+                "Colaborador eliminado exitosamente",
+                null
+        ));
+    }
+
     // DTOs
-    record CompartirMetaRequest(Long usuarioInvitadoId) {}
+    record CompartirMetaRequest(String usernameInvitado) {}
 
     record AportarRequest(BigDecimal monto, String descripcion) {}
 

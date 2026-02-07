@@ -457,12 +457,14 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 **Body (application/json):**
 ```json
 {
-  "usuarioInvitadoId": 456
+  "usernameInvitado": "john_doe"
 }
 ```
 
 **Campos obligatorios:**
-- `usuarioInvitadoId` (number): ID del usuario con quien compartir
+- `usernameInvitado` (string): Username del usuario con quien compartir
+
+**✨ Cambio importante:** Ahora se usa **username** en lugar de userId para que sea más amigable
 
 **Respuesta exitosa (201 Created):**
 ```json
@@ -474,21 +476,37 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
   "aporteTotal": 0.00,
   "porcentajeAporte": 0.0,
   "activo": true,
-  "invitadoAt": "2026-02-07T15:30:00Z",
+  "invitadoAt": "2026-02-08T15:30:00Z",
   "aceptadoAt": null
+}
+```
+
+**Notificación que recibe el invitado:**
+```json
+{
+  "id": 1,
+  "usuarioId": 456,
+  "tipo": "META_COMPARTIDA",
+  "titulo": "🤝 Invitación a Meta Compartida",
+  "mensaje": "john_doe te ha invitado a colaborar en 'Vacaciones 2026'",
+  "leida": false,
+  "fechaEnvio": "2026-02-08T03:54:49",
+  "metaId": 1,
+  "usuarioInvitador": "john_doe",
+  "metaNombre": "Vacaciones 2026"
 }
 ```
 
 **Validaciones:**
 - ✅ Usuario debe ser dueño de la meta
 - ✅ No se puede compartir con uno mismo
-- ✅ Usuario invitado debe existir
-- ✅ Se envía notificación automática al invitado
+- ✅ Username debe existir
+- ✅ Se envía notificación automática con **metaId**, **usuarioInvitador** y **metaNombre**
 
 **Errores posibles:**
 - `404` - Meta no encontrada
 - `403` - No eres dueño de esta meta
-- `400` - Usuario invitado no existe
+- `400` - Usuario 'username' no encontrado
 
 ---
 
@@ -603,6 +621,84 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 
 ---
 
+### 5.5 Aceptar Invitación a Meta Compartida
+
+**Endpoint:** `POST /api/metas-compartidas/{metaId}/aceptar`
+
+**Autenticación:** ✅ Requerida
+
+**Path Parameters:**
+- `metaId` (number): ID de la meta
+
+**Body:** Ninguno
+
+**Respuesta exitosa (200):**
+```json
+{
+  "mensaje": "Invitación aceptada exitosamente",
+  "monto": null
+}
+```
+
+**Descripción:** Marca la invitación como aceptada y actualiza `aceptadoAt`
+
+---
+
+### 5.6 Salir de Meta Compartida
+
+**Endpoint:** `DELETE /api/metas-compartidas/{metaId}/salir`
+
+**Autenticación:** ✅ Requerida
+
+**Path Parameters:**
+- `metaId` (number): ID de la meta
+
+**Respuesta exitosa (200):**
+```json
+{
+  "mensaje": "Has salido de la meta compartida",
+  "monto": null
+}
+```
+
+**Validaciones:**
+- ❌ El creador NO puede salir de su propia meta
+- ✅ Colaboradores pueden salir cuando quieran
+
+**Error:**
+- `400` - "El creador no puede salir de la meta"
+
+---
+
+### 5.7 Eliminar Colaborador (Solo Creador)
+
+**Endpoint:** `DELETE /api/metas-compartidas/{metaId}/colaborador/{colaboradorId}`
+
+**Autenticación:** ✅ Requerida
+
+**Path Parameters:**
+- `metaId` (number): ID de la meta
+- `colaboradorId` (number): ID del usuario a eliminar
+
+**Respuesta exitosa (200):**
+```json
+{
+  "mensaje": "Colaborador eliminado exitosamente",
+  "monto": null
+}
+```
+
+**Validaciones:**
+- ✅ Solo el creador puede eliminar colaboradores
+- ❌ No se puede eliminar al creador
+- ✅ Envía notificación al colaborador eliminado
+
+**Errores:**
+- `403` - "Solo el creador puede eliminar colaboradores"
+- `400` - "No puedes eliminar al creador"
+
+---
+
 ### 📱 Ejemplo de Integración en React Native
 
 ```javascript
@@ -610,11 +706,11 @@ const consejo = await fetch(`${API_URL}/coach/consejo-del-dia`, {
 import api from './api';
 
 export const metasCompartidasService = {
-  // Compartir meta con otro usuario
-  compartirMeta: async (metaId, usuarioInvitadoId) => {
+  // Compartir meta con otro usuario (por username)
+  compartirMeta: async (metaId, usernameInvitado) => {
     const response = await api.post(
       `/metas-compartidas/${metaId}/compartir`,
-      { usuarioInvitadoId }
+      { usernameInvitado }
     );
     return response.data;
   },
@@ -639,6 +735,30 @@ export const metasCompartidasService = {
   // Mis metas compartidas
   getMisMetasCompartidas: async () => {
     const response = await api.get('/metas-compartidas/mis-metas');
+    return response.data;
+  },
+
+  // Aceptar invitación
+  aceptarInvitacion: async (metaId) => {
+    const response = await api.post(
+      `/metas-compartidas/${metaId}/aceptar`
+    );
+    return response.data;
+  },
+
+  // Salir de meta
+  salirDeMeta: async (metaId) => {
+    const response = await api.delete(
+      `/metas-compartidas/${metaId}/salir`
+    );
+    return response.data;
+  },
+
+  // Eliminar colaborador (solo creador)
+  eliminarColaborador: async (metaId, colaboradorId) => {
+    const response = await api.delete(
+      `/metas-compartidas/${metaId}/colaborador/${colaboradorId}`
+    );
     return response.data;
   }
 };
