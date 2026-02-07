@@ -5,9 +5,12 @@ import com.controfinanciero.application.dto.MovimientoFinancieroDTO;
 import com.controfinanciero.domain.exception.UsuarioNoEncontradoException;
 import com.controfinanciero.domain.model.*;
 import com.controfinanciero.domain.repository.*;
+import com.controfinanciero.infrastructure.service.BudgetMonitorService;
+import com.controfinanciero.infrastructure.service.GoalMonitorService;
 
 /**
  * Caso de uso: Crear un nuevo movimiento financiero
+ * ✅ Integrado con sistema de notificaciones automáticas
  */
 public class CrearMovimientoFinancieroUseCase {
 
@@ -16,18 +19,24 @@ public class CrearMovimientoFinancieroUseCase {
     private final CategoriaRepository categoriaRepository;
     private final FuenteIngresoRepository fuenteIngresoRepository;
     private final MetaFinancieraRepository metaRepository;
+    private final BudgetMonitorService budgetMonitorService;
+    private final GoalMonitorService goalMonitorService;
 
     public CrearMovimientoFinancieroUseCase(
             MovimientoFinancieroRepository movimientoRepository,
             UsuarioRepository usuarioRepository,
             CategoriaRepository categoriaRepository,
             FuenteIngresoRepository fuenteIngresoRepository,
-            MetaFinancieraRepository metaRepository) {
+            MetaFinancieraRepository metaRepository,
+            BudgetMonitorService budgetMonitorService,
+            GoalMonitorService goalMonitorService) {
         this.movimientoRepository = movimientoRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
         this.fuenteIngresoRepository = fuenteIngresoRepository;
         this.metaRepository = metaRepository;
+        this.budgetMonitorService = budgetMonitorService;
+        this.goalMonitorService = goalMonitorService;
     }
 
     public MovimientoFinancieroDTO ejecutar(CrearMovimientoFinancieroCommand command) {
@@ -74,6 +83,18 @@ public class CrearMovimientoFinancieroUseCase {
                 meta.agregarMonto(guardado.getMonto());
                 metaRepository.save(meta);
             });
+
+            // ✅ Verificar progreso de la meta y generar notificación si aplica
+            goalMonitorService.verificarProgresoMeta(guardado.getMetaId());
+        }
+
+        // ✅ Si es un gasto (EXPENSE), verificar presupuesto y generar alerta si aplica
+        if (command.tipoMovimiento().name().equals("EXPENSE") && guardado.getCategoriaId() != null) {
+            budgetMonitorService.verificarPresupuestoDespuesDeGasto(
+                    guardado.getUsuarioId(),
+                    guardado.getCategoriaId(),
+                    guardado.getMonto()
+            );
         }
 
         // Retornar DTO con información enriquecida

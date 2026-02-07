@@ -12,6 +12,10 @@ import com.controfinanciero.infrastructure.web.dto.response.MovimientoFinanciero
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +69,74 @@ public class MovimientoFinancieroController {
         MovimientoFinancieroResponse response = toResponse(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * ✅ NUEVO: Obtener movimientos con paginación
+     * GET /api/movimientos/paginated?page=0&size=20&sort=movementDate,desc
+     */
+    @GetMapping("/paginated")
+    public ResponseEntity<Page<MovimientoFinancieroResponse>> obtenerMovimientosPaginados(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "movementDate,desc") String[] sort,
+            @RequestParam(required = false) TipoMovimiento tipo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(required = false) Long categoriaId) {
+
+        Long userId = authenticatedUserService.getCurrentUserId();
+
+        // Construir Sort
+        Sort.Direction direction = sort.length > 1 && sort[1].equalsIgnoreCase("asc")
+            ? Sort.Direction.ASC
+            : Sort.Direction.DESC;
+        String property = sort[0];
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, property));
+
+        // Obtener repository para usar métodos paginados
+        var jpaRepo = (com.controfinanciero.infrastructure.persistence.repository.MovimientoFinancieroJpaRepository)
+                      movimientoRepository;
+
+        Page<com.controfinanciero.infrastructure.persistence.entity.MovimientoFinancieroEntity> entityPage;
+
+        // Aplicar filtros
+        if (fechaInicio != null && fechaFin != null) {
+            entityPage = jpaRepo.findByUserIdAndDateRange(userId, fechaInicio, fechaFin, pageable);
+        } else if (tipo != null) {
+            entityPage = jpaRepo.findByUserIdAndMovementType(userId, tipo, pageable);
+        } else if (categoriaId != null) {
+            entityPage = jpaRepo.findByUserIdAndCategoryId(userId, categoriaId, pageable);
+        } else {
+            entityPage = jpaRepo.findByUserId(userId, pageable);
+        }
+
+        // Convertir a DTOs y luego a Responses
+        Page<MovimientoFinancieroResponse> responsePage = entityPage.map(entity -> {
+            // Convertir entity a DTO manualmente (simplificado)
+            MovimientoFinancieroDTO dto = new MovimientoFinancieroDTO(
+                entity.getId(),
+                entity.getUserId(),
+                entity.getMovementType(),
+                entity.getAmount(),
+                entity.getDescription(),
+                entity.getMovementDate(),
+                entity.getCategoryId(),
+                null, // categoriaNombre
+                entity.getIncomeSourceId(),
+                null, // fuenteIngresoNombre
+                entity.getGoalId(),
+                null, // metaNombre
+                entity.getIsRecurring(),
+                entity.getRecurrencePattern(),
+                entity.getNotes(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
+            );
+            return toResponse(dto);
+        });
+
+        return ResponseEntity.ok(responsePage);
     }
 
     /**

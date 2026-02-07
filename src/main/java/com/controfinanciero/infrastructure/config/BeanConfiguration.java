@@ -19,6 +19,8 @@ import com.controfinanciero.domain.repository.UsuarioRepository;
 import com.controfinanciero.domain.service.CalculadorProgresoMeta;
 import com.controfinanciero.domain.service.CalculadorSaldo;
 import com.controfinanciero.domain.service.GeneradorResumen;
+import com.controfinanciero.infrastructure.service.BudgetMonitorService;
+import com.controfinanciero.infrastructure.service.GoalMonitorService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -115,14 +117,18 @@ public class BeanConfiguration {
             UsuarioRepository usuarioRepository,
             CategoriaRepository categoriaRepository,
             FuenteIngresoRepository fuenteIngresoRepository,
-            MetaFinancieraRepository metaRepository
+            MetaFinancieraRepository metaRepository,
+            BudgetMonitorService budgetMonitorService,
+            GoalMonitorService goalMonitorService
     ) {
         return new CrearMovimientoFinancieroUseCase(
                 movimientoRepository,
                 usuarioRepository,
                 categoriaRepository,
                 fuenteIngresoRepository,
-                metaRepository
+                metaRepository,
+                budgetMonitorService,
+                goalMonitorService
         );
     }
 

@@ -4,6 +4,7 @@ import com.controfinanciero.application.dto.ContextoFinancieroDTO;
 import com.controfinanciero.application.dto.CrearContextoFinancieroCommand;
 import com.controfinanciero.application.usecase.contexto.CrearContextoFinancieroUseCase;
 import com.controfinanciero.application.usecase.contexto.ObtenerContextoFinancieroUseCase;
+import com.controfinanciero.infrastructure.security.AuthenticatedUserService;
 import com.controfinanciero.infrastructure.web.dto.request.CrearContextoFinancieroRequest;
 import com.controfinanciero.infrastructure.web.dto.response.ContextoFinancieroResponse;
 import jakarta.validation.Valid;
@@ -20,13 +21,16 @@ public class ContextoFinancieroController {
 
     private final CrearContextoFinancieroUseCase crearContextoUseCase;
     private final ObtenerContextoFinancieroUseCase obtenerContextoUseCase;
+    private final AuthenticatedUserService authenticatedUserService;
 
     public ContextoFinancieroController(
             CrearContextoFinancieroUseCase crearContextoUseCase,
-            ObtenerContextoFinancieroUseCase obtenerContextoUseCase
+            ObtenerContextoFinancieroUseCase obtenerContextoUseCase,
+            AuthenticatedUserService authenticatedUserService
     ) {
         this.crearContextoUseCase = crearContextoUseCase;
         this.obtenerContextoUseCase = obtenerContextoUseCase;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     /**
@@ -53,6 +57,17 @@ public class ContextoFinancieroController {
         ContextoFinancieroResponse response = mapearAResponse(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * GET /api/contextos-financieros - Obtener contexto del usuario autenticado
+     */
+    @GetMapping
+    public ResponseEntity<ContextoFinancieroResponse> obtenerMiContexto() {
+        Long usuarioId = authenticatedUserService.getCurrentUserId();
+        ContextoFinancieroDTO dto = obtenerContextoUseCase.ejecutarPorUsuarioId(usuarioId);
+        ContextoFinancieroResponse response = mapearAResponse(dto);
+        return ResponseEntity.ok(response);
     }
 
     /**
