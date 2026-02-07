@@ -34,7 +34,7 @@ public class MetaColaboradorEntity {
     @Column(name = "aporte_total", precision = 15, scale = 2)
     private BigDecimal aporteTotal = BigDecimal.ZERO;
 
-    @Column(name = "porcentaje_aporte", precision = 5, scale = 2)
+    @Column(name = "porcentaje_aporte")
     private Double porcentajeAporte = 0.0;
 
     @Column(name = "activo", nullable = false)
