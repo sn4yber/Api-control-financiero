@@ -2,6 +2,8 @@ package com.controfinanciero.infrastructure.web.controller;
 
 import com.controfinanciero.application.dto.CrearMetaFinancieraCommand;
 import com.controfinanciero.application.dto.MetaFinancieraDTO;
+import com.controfinanciero.domain.model.Usuario;
+import com.controfinanciero.infrastructure.service.SmartGoalsService;
 import com.controfinanciero.application.usecase.Meta.CrearMetaFinancieraUseCase;
 import com.controfinanciero.application.usecase.Meta.ObtenerMetasFinancierasUseCase;
 import com.controfinanciero.domain.model.enums.EstadoMeta;
@@ -32,6 +34,7 @@ public class MetaFinancieraController {
     private final ObtenerMetasFinancierasUseCase obtenerMetasUseCase;
     private final MetaFinancieraRepository metaRepository;
     private final AuthenticatedUserService authenticatedUserService;
+    private final SmartGoalsService smartGoalsService;
 
     @PostMapping
     public ResponseEntity<MetaFinancieraResponse> crearMeta(@Valid @RequestBody CrearMetaFinancieraRequest request) {
@@ -127,6 +130,57 @@ public class MetaFinancieraController {
         }
     }
 
+    /**
+     * 🎯 GET /api/metas/{id}/analisis-inteligente
+     * Analiza una meta con proyecciones y recomendaciones
+     */
+    @GetMapping("/{id}/analisis-inteligente")
+    public ResponseEntity<SmartGoalsService.MetaInteligente> analizarMeta(@PathVariable Long id) {
+        Long userId = authenticatedUserService.getCurrentUserId();
+
+        var meta = metaRepository.findById(id).orElse(null);
+        if (meta == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!meta.getUsuarioId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        SmartGoalsService.MetaInteligente analisis = smartGoalsService.analizarMeta(id);
+        return ResponseEntity.ok(analisis);
+    }
+
+    /**
+     * 🎯 GET /api/metas/analisis-completo
+     * Analiza todas las metas activas del usuario
+     */
+    @GetMapping("/analisis-completo")
+    public ResponseEntity<?> analizarTodasLasMetas() {
+        Long userId = authenticatedUserService.getCurrentUserId();
+
+        var analisis = smartGoalsService.analizarTodasLasMetas(userId);
+
+        return ResponseEntity.ok(new AnalisisCompletoResponse(
+                analisis.size(),
+                analisis
+        ));
+    }
+
+    /**
+     * 💰 GET /api/metas/recomendacion-ahorro
+     * Recomienda monto óptimo para ahorrar mensualmente
+     */
+    @GetMapping("/recomendacion-ahorro")
+    public ResponseEntity<SmartGoalsService.RecomendacionAhorro> recomendarAhorro() {
+        Long userId = authenticatedUserService.getCurrentUserId();
+
+        SmartGoalsService.RecomendacionAhorro recomendacion =
+                smartGoalsService.recomendarAhorroMensual(userId);
+
+        return ResponseEntity.ok(recomendacion);
+    }
+
     private MetaFinancieraResponse toResponse(MetaFinancieraDTO dto) {
         return new MetaFinancieraResponse(
                 dto.id(),
@@ -143,6 +197,11 @@ public class MetaFinancieraController {
                 dto.completedAt()
         );
     }
+
+    record AnalisisCompletoResponse(
+            int totalMetas,
+            java.util.List<SmartGoalsService.MetaInteligente> metas
+    ) {}
 
     record ErrorResponse(String message) {}
 }

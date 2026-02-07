@@ -3,6 +3,8 @@ package com.controfinanciero.infrastructure.web.controller;
 import com.controfinanciero.application.usecase.usuario.CrearUsuarioUseCase;
 import com.controfinanciero.domain.repository.UsuarioRepository;
 import com.controfinanciero.infrastructure.security.JwtUtil;
+import com.controfinanciero.infrastructure.security.model.RefreshToken;
+import com.controfinanciero.infrastructure.security.service.RefreshTokenService;
 import com.controfinanciero.infrastructure.web.dto.request.LoginRequest;
 import com.controfinanciero.infrastructure.web.dto.request.RegisterRequest;
 import com.controfinanciero.infrastructure.web.dto.response.AuthResponse;
@@ -30,6 +32,7 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final CrearUsuarioUseCase crearUsuarioUseCase;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
@@ -43,8 +46,12 @@ public class AuthController {
 
             String token = jwtUtil.generateToken(usuario.getId(), usuario.getUsername(), usuario.getEmail());
 
-            return ResponseEntity.ok(AuthResponse.of(
+            // Crear refresh token
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(usuario.getId());
+
+            return ResponseEntity.ok(new AuthResponseWithRefresh(
                     token,
+                    refreshToken.getToken(),
                     usuario.getId(),
                     usuario.getUsername(),
                     usuario.getEmail(),
@@ -89,6 +96,60 @@ public class AuthController {
                 usuarioDto.fullName()
         ));
     }
+
+    /**
+     * POST /api/auth/refresh
+     * Refresca el access token usando el refresh token
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        var optionalRefreshToken = refreshTokenService.validateRefreshToken(request.refreshToken());
+
+        if (optionalRefreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Refresh token inválido o expirado"));
+        }
+
+        RefreshToken refreshToken = optionalRefreshToken.get();
+        var usuario = usuarioRepository.findById(refreshToken.getUserId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String newAccessToken = jwtUtil.generateToken(
+                usuario.getId(),
+                usuario.getUsername(),
+                usuario.getEmail()
+        );
+
+        return ResponseEntity.ok(new TokenRefreshResponse(
+                newAccessToken,
+                refreshToken.getToken()
+        ));
+    }
+
+    /**
+     * POST /api/auth/logout
+     * Revoca el refresh token del usuario
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
+        refreshTokenService.revokeToken(request.refreshToken());
+        return ResponseEntity.ok(new SuccessResponse("Sesión cerrada exitosamente"));
+    }
+
+    record RefreshTokenRequest(String refreshToken) {}
+
+    record TokenRefreshResponse(String accessToken, String refreshToken) {}
+
+    record SuccessResponse(String message) {}
+
+    record AuthResponseWithRefresh(
+            String token,
+            String refreshToken,
+            Long userId,
+            String username,
+            String email,
+            String fullName
+    ) {}
 
     record ErrorResponse(String message) {}
 }
