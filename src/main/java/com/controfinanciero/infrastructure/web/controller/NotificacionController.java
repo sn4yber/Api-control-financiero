@@ -141,17 +141,19 @@ public class NotificacionController {
         List<NotificacionEntity> todasNotificaciones = notificacionRepo
                 .findByUsuarioIdOrderByCreatedAtDesc(usuario.getId());
 
-        // Filtrar y eliminar las que no tienen version o son pre-1.6.0
-        long eliminadas = todasNotificaciones.stream()
+        // Filtrar notificaciones antiguas (sin version o pre-1.6.0)
+        List<NotificacionEntity> notificacionesAntiguas = todasNotificaciones.stream()
                 .filter(n -> n.getVersion() == null ||
                             n.getVersion().isEmpty() ||
                             !n.getVersion().equals("1.6.0"))
-                .peek(notificacionRepo::delete)
-                .count();
+                .toList();
+
+        // Eliminar todas las notificaciones antiguas
+        notificacionesAntiguas.forEach(notificacionRepo::delete);
 
         Map<String, Object> response = new HashMap<>();
         response.put("mensaje", "Notificaciones antiguas eliminadas");
-        response.put("cantidad", eliminadas);
+        response.put("cantidad", notificacionesAntiguas.size());
         response.put("version", "1.6.0");
 
         return ResponseEntity.ok(response);
