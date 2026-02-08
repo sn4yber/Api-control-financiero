@@ -133,16 +133,33 @@ public class SharedGoalsService {
                     colaborador.setAporteTotal(nuevoAporte);
                     colaboradorRepository.save(colaborador);
 
-                    // Notificar a otros colaboradores
+                    // Obtener información de la meta para la notificación
+                    var meta = metaRepository.findById(metaId)
+                            .orElseThrow(() -> new RuntimeException("Meta no encontrada"));
+
+                    // Obtener username del usuario que aportó
+                    var usuarioQueAporta = usuarioRepository.findById(usuarioId)
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                    // Notificar a otros colaboradores con metadata completa
                     List<MetaColaboradorEntity> otros = colaboradorRepository
                             .findByMetaIdAndUsuarioIdNot(metaId, usuarioId);
 
                     for (MetaColaboradorEntity otro : otros) {
-                        notificationService.crearNotificacion(
+                        Map<String, Object> metadata = new HashMap<>();
+                        metadata.put("metaId", metaId);
+                        metadata.put("usuarioInvitador", usuarioQueAporta.getUsername());
+                        metadata.put("metaNombre", meta.getNombre());
+
+                        notificationService.crearNotificacionConMetadata(
                                 otro.getUsuarioId(),
                                 "APORTE_META_COMPARTIDA",
                                 "💰 Nuevo Aporte a Meta Compartida",
-                                String.format("Se ha realizado un aporte de $%.2f a la meta compartida", monto.doubleValue())
+                                String.format("%s ha realizado un aporte de $%.2f a '%s'",
+                                        usuarioQueAporta.getUsername(),
+                                        monto.doubleValue(),
+                                        meta.getNombre()),
+                                metadata
                         );
                     }
                 });

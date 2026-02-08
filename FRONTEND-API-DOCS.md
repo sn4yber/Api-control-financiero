@@ -961,7 +961,15 @@ const MetaCompartidaScreen = ({ metaId }) => {
 
 **Autenticación:** ✅ Requerida
 
-**Descripción:** Elimina notificaciones sin metadata (pre-v1.6.0) que no tienen `metaId`, `usuarioInvitador`, etc.
+**Estado:** ✅ **CORREGIDO Y FUNCIONAL** (v1.6.0+)
+
+**Descripción:** Elimina notificaciones sin metadata (pre-v1.6.0) que no tienen `metaId`, `usuarioInvitador`, etc. Este endpoint **resuelve el problema** de notificaciones antiguas que causan errores de `metaId undefined`.
+
+**¿Por qué es necesario?**
+Las notificaciones pre-v1.6.0 no tienen los campos necesarios para metas compartidas:
+- ❌ Sin `metaId` → Error al intentar aceptar meta
+- ❌ Sin `usuarioInvitador` → No se sabe quién invita
+- ❌ Sin `metaNombre` → No se sabe qué meta es
 
 **Respuesta exitosa (200):**
 ```json
@@ -972,30 +980,178 @@ const MetaCompartidaScreen = ({ metaId }) => {
 }
 ```
 
-**Uso recomendado:**
-- Llamar al iniciar la app por primera vez después de actualizar
-- Llamar si hay errores con notificaciones antiguas
-- Limpia el cache de notificaciones obsoletas
+**Campos de respuesta:**
+- `mensaje` (string): Mensaje de confirmación
+- `cantidad` (number): Número real de notificaciones eliminadas
+- `version` (string): Versión del formato actual
 
-**Ejemplo de uso:**
+**Uso recomendado:**
+- ✅ Llamar **una sola vez** al actualizar la app a v1.6.0
+- ✅ Usar control de versión con AsyncStorage
+- ✅ Ejecutar en background al iniciar la app
+
+**Implementación completa:**
+
 ```javascript
-// Al iniciar la app (una sola vez)
-const limpiarNotificacionesAntiguas = async () => {
+// services/notificationService.js
+import api from './api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const APP_VERSION = '1.6.0';
+const VERSION_KEY = 'lastAppVersion';
+
+/**
+ * Limpia notificaciones antiguas (pre-v1.6.0) una sola vez
+ * Resuelve el problema de metaId undefined
+ */
+export const limpiarCacheAntiguo = async () => {
   try {
-    const { data } = await api.delete('/notificaciones/limpiar-antiguas');
-    console.log(`✅ ${data.cantidad} notificaciones antiguas eliminadas`);
+    const lastVersion = await AsyncStorage.getItem(VERSION_KEY);
+    
+    // Solo ejecutar si es primera vez con v1.6.0
+    if (lastVersion !== APP_VERSION) {
+      console.log('🧹 Limpiando notificaciones antiguas...');
+      
+      const { data } = await api.delete('/notificaciones/limpiar-antiguas');
+      
+      console.log(`✅ ${data.cantidad} notificaciones obsoletas eliminadas`);
+      console.log(`📦 Versión actual: ${data.version}`);
+      
+      // Guardar versión para no volver a limpiar
+      await AsyncStorage.setItem(VERSION_KEY, APP_VERSION);
+      
+      return {
+        success: true,
+        cantidad: data.cantidad,
+        version: data.version
+      };
+    }
+    
+    console.log('✨ Cache ya está limpio');
+    return { success: true, cantidad: 0, cached: true };
+    
   } catch (error) {
-    console.error('Error limpiando notificaciones:', error);
+    console.error('❌ Error limpiando notificaciones:', error);
+    return { 
+      success: false, 
+      error: error.message,
+      cantidad: 0 
+    };
   }
 };
 
-// Llamar solo si la versión cambió
-const APP_VERSION = '1.6.0';
-const lastVersion = await AsyncStorage.getItem('lastAppVersion');
-if (lastVersion !== APP_VERSION) {
-  await limpiarNotificacionesAntiguas();
-  await AsyncStorage.setItem('lastAppVersion', APP_VERSION);
-}
+/**
+ * Valida que una notificación tenga el formato v1.6.0
+ */
+export const esNotificacionValida = (notif) => {
+  // Verificar que tenga versión correcta
+  if (!notif.version || notif.version !== '1.6.0') {
+    console.warn('⚠️ Notificación con formato antiguo:', notif.id);
+    return false;
+  }
+  
+  // Si es META_COMPARTIDA, verificar metadata obligatoria
+  if (notif.tipo === 'META_COMPARTIDA') {
+    const tieneMetadata = 
+      notif.metaId && 
+      notif.usuarioInvitador && 
+      notif.metaNombre;
+    
+    if (!tieneMetadata) {
+      console.warn('⚠️ META_COMPARTIDA sin metadata completa:', notif.id);
+      return false;
+    }
+  }
+  
+  return true;
+};
+
+/**
+ * Filtra solo notificaciones válidas v1.6.0
+ */
+export const filtrarNotificacionesValidas = (notificaciones) => {
+  return notificaciones.filter(esNotificacionValida);
+};
+```
+
+**Uso en App.js:**
+
+```javascript
+// App.js
+import { useEffect, useState } from 'react';
+import { limpiarCacheAntiguo } from './services/notificationService';
+
+const App = () => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    inicializarApp();
+  }, []);
+
+  const inicializarApp = async () => {
+    try {
+      // Limpiar notificaciones antiguas (solo primera vez)
+      const resultado = await limpiarCacheAntiguo();
+      
+      if (resultado.success && resultado.cantidad > 0) {
+        console.log(`🎉 App actualizada a v${resultado.version}`);
+        console.log(`🧹 ${resultado.cantidad} notificaciones antiguas eliminadas`);
+        
+        // Opcional: Mostrar toast al usuario
+        // Toast.show('Cache limpiado exitosamente');
+      }
+    } catch (error) {
+      console.error('Error inicializando app:', error);
+    } finally {
+      setIsReady(true);
+    }
+  };
+
+  if (!isReady) {
+    return <SplashScreen />;
+  }
+
+  return <NavigationContainer>{/* Tu app */}</NavigationContainer>;
+};
+```
+
+**Validación en componentes:**
+
+```javascript
+// components/NotificationBadge.js
+import { esNotificacionValida } from '../services/notificationService';
+
+const NotificationBadge = ({ notification }) => {
+  // Validar antes de renderizar
+  if (!esNotificacionValida(notification)) {
+    return null; // No mostrar notificaciones antiguas
+  }
+
+  const handleAccept = async () => {
+    if (notification.tipo === 'META_COMPARTIDA') {
+      // ✅ Garantizado que metaId existe en v1.6.0
+      await goalService.acceptGoal(notification.metaId);
+    }
+  };
+
+  return (
+    <View>
+      <Text>{notification.mensaje}</Text>
+      {notification.tipo === 'META_COMPARTIDA' && (
+        <>
+          <Text>Invitado por: {notification.usuarioInvitador}</Text>
+          <Text>Meta: {notification.metaNombre}</Text>
+          <Button 
+            onPress={handleAccept}
+            // ✅ Ya no necesitas disabled, siempre tendrá metaId
+          >
+            Aceptar Invitación
+          </Button>
+        </>
+      )}
+    </View>
+  );
+};
 ```
 
 ---
@@ -1005,10 +1161,25 @@ if (lastVersion !== APP_VERSION) {
 **Todos los tipos de notificación ahora incluyen:**
 - `version` (string): Versión del formato ("1.6.0")
 
-**Notificaciones de META_COMPARTIDA incluyen:**
-- `metaId` (number): ID de la meta para aceptar/rechazar
-- `usuarioInvitador` (string): Username de quien invita
-- `metaNombre` (string): Nombre de la meta
+**Notificaciones relacionadas con metas compartidas incluyen `metaId`:**
+
+1. **META_COMPARTIDA** (Invitación a meta compartida):
+   - `metaId` (number): ID de la meta para aceptar/rechazar
+   - `usuarioInvitador` (string): Username de quien invita
+   - `metaNombre` (string): Nombre de la meta
+
+2. **APORTE_META_COMPARTIDA** (Notificación de nuevo aporte):
+   - `metaId` (number): ID de la meta donde se hizo el aporte
+   - `usuarioInvitador` (string): Username de quien hizo el aporte
+   - `metaNombre` (string): Nombre de la meta
+
+3. **META_COMPLETADA** (Meta alcanzada):
+   - `metaId` (number): ID de la meta completada
+   - `metaNombre` (string): Nombre de la meta
+
+4. **RECORDATORIO_META** (Recordatorio de meta):
+   - `metaId` (number): ID de la meta
+   - `metaNombre` (string): Nombre de la meta
 
 **Validación en frontend:**
 ```javascript
@@ -1018,13 +1189,45 @@ const esNotificacionValida = (notif) => {
     return false;
   }
   
-  // Si es META_COMPARTIDA, verificar metadata
-  if (notif.tipo === 'META_COMPARTIDA') {
-    return notif.metaId && notif.usuarioInvitador && notif.metaNombre;
+  // Tipos de notificación que REQUIEREN metaId
+  const tiposConMetaId = [
+    'META_COMPARTIDA',
+    'APORTE_META_COMPARTIDA',
+    'META_COMPLETADA',
+    'RECORDATORIO_META'
+  ];
+  
+  // Si es un tipo que necesita metaId, validar que exista
+  if (tiposConMetaId.includes(notif.tipo)) {
+    if (!notif.metaId || notif.metaId === null) {
+      return false;
+    }
+    
+    // Validación especial para META_COMPARTIDA
+    if (notif.tipo === 'META_COMPARTIDA') {
+      return notif.usuarioInvitador && notif.metaNombre;
+    }
   }
   
   return true;
 };
+```
+
+**Ejemplo de notificación de aporte:**
+```json
+{
+  "id": 2,
+  "usuarioId": 123,
+  "tipo": "APORTE_META_COMPARTIDA",
+  "titulo": "💰 Nuevo Aporte a Meta Compartida",
+  "mensaje": "john_doe ha realizado un aporte de $500.00 a 'Vacaciones 2026'",
+  "leida": false,
+  "fechaEnvio": "2026-02-08T10:30:00",
+  "metaId": 1,
+  "usuarioInvitador": "john_doe",
+  "metaNombre": "Vacaciones 2026",
+  "version": "1.6.0"
+}
 ```
 
 ---
@@ -1162,5 +1365,233 @@ const CoachScreen = () => {
 - Si el problema persiste, contacta al equipo de backend
 
 **Versión del documento:** 1.6.0  
-**Última actualización:** 2026-02-07
+**Última actualización:** 2026-02-08
+
+---
+
+## 🔧 TROUBLESHOOTING
+
+### Problema: "metaId is undefined" en notificaciones
+
+**Causa:** Notificaciones antiguas (pre-v1.6.0) sin metadata
+
+**Solución:**
+```javascript
+// Ejecutar una sola vez al actualizar app
+await api.delete('/notificaciones/limpiar-antiguas');
+```
+
+**Prevención:**
+- Validar `notification.version === '1.6.0'` antes de usar
+- Filtrar notificaciones con `esNotificacionValida()`
+- No mostrar notificaciones sin `metaId` si son de tipo META_COMPARTIDA
+
+---
+
+### Problema: Endpoint devuelve 401 Unauthorized
+
+**Causa:** Token expirado o inválido
+
+**Solución:**
+```javascript
+// Usar refresh token
+const response = await api.post('/auth/refresh', {
+  refreshToken: storedRefreshToken
+});
+const newToken = response.data.accessToken;
+```
+
+---
+
+### Problema: Error 429 Too Many Requests
+
+**Causa:** Rate limit excedido (100 req/min)
+
+**Solución:**
+- Implementar debounce en peticiones
+- Cachear respuestas localmente
+- Esperar 60 segundos antes de reintentar
+- Verificar header `X-Rate-Limit-Remaining`
+
+---
+
+## 📋 MEJORES PRÁCTICAS
+
+### 1. Manejo de Notificaciones
+
+✅ **HACER:**
+```javascript
+// Validar versión antes de usar
+if (notification.version === '1.6.0') {
+  // Usar notificación
+}
+
+// Filtrar notificaciones válidas
+const validas = notifications.filter(esNotificacionValida);
+```
+
+❌ **NO HACER:**
+```javascript
+// No asumir que metaId siempre existe
+await goalService.acceptGoal(notification.metaId); // Puede ser undefined
+
+// No ignorar el campo version
+// Siempre validar antes de usar
+```
+
+---
+
+### 2. Limpieza de Cache
+
+✅ **HACER:**
+```javascript
+// Limpiar solo una vez por versión
+const APP_VERSION = '1.6.0';
+const lastVersion = await AsyncStorage.getItem('lastAppVersion');
+
+if (lastVersion !== APP_VERSION) {
+  await limpiarCacheAntiguo();
+  await AsyncStorage.setItem('lastAppVersion', APP_VERSION);
+}
+```
+
+❌ **NO HACER:**
+```javascript
+// No limpiar en cada inicio
+useEffect(() => {
+  limpiarCacheAntiguo(); // ❌ Innecesario y lento
+}, []);
+```
+
+---
+
+### 3. Metas Compartidas
+
+✅ **HACER:**
+```javascript
+// Usar username, no userId
+await api.post('/metas-compartidas/1/compartir', {
+  usernameInvitado: 'john_doe' // ✅ Amigable
+});
+
+// Validar metadata en notificación
+if (notif.metaId && notif.usuarioInvitador) {
+  // Mostrar UI completa
+}
+```
+
+❌ **NO HACER:**
+```javascript
+// No usar userId (deprecated)
+await api.post('/metas-compartidas/1/compartir', {
+  usuarioInvitadoId: 456 // ❌ Ya no funciona
+});
+```
+
+---
+
+### 4. Manejo de Errores
+
+✅ **HACER:**
+```javascript
+try {
+  const response = await api.get('/endpoint');
+  return response.data;
+} catch (error) {
+  if (error.response?.status === 401) {
+    // Token expirado, refresh
+    await refreshToken();
+  } else if (error.response?.status === 429) {
+    // Rate limit, esperar
+    await delay(60000);
+  } else {
+    // Otros errores
+    console.error('Error:', error.message);
+  }
+  throw error;
+}
+```
+
+---
+
+### 5. Optimización de Peticiones
+
+✅ **HACER:**
+```javascript
+// Cachear respuestas
+const [notificaciones, setNotificaciones] = useState([]);
+const [lastFetch, setLastFetch] = useState(0);
+
+const fetchNotificaciones = async () => {
+  const now = Date.now();
+  // Cachear por 30 segundos
+  if (now - lastFetch < 30000 && notificaciones.length > 0) {
+    return notificaciones;
+  }
+  
+  const { data } = await api.get('/notificaciones');
+  setNotificaciones(data);
+  setLastFetch(now);
+  return data;
+};
+```
+
+---
+
+## 🎯 CHECKLIST DE INTEGRACIÓN
+
+### Al implementar v1.6.0:
+
+- [ ] Implementar limpieza de cache al actualizar
+- [ ] Validar `version` en todas las notificaciones
+- [ ] Actualizar compartir metas para usar `username`
+- [ ] Agregar validación de metadata en META_COMPARTIDA
+- [ ] Implementar manejo de rate limiting
+- [ ] Configurar refresh token automático
+- [ ] Agregar manejo de errores 401/429
+- [ ] Cachear respuestas frecuentes
+- [ ] Probar con notificaciones antiguas
+- [ ] Verificar que metaId siempre exista antes de usar
+
+---
+
+## 📚 RECURSOS ADICIONALES
+
+### Estructura de Notificación v1.6.0:
+```typescript
+interface NotificacionV160 {
+  id: number;
+  usuarioId: number;
+  tipo: string;
+  titulo: string;
+  mensaje: string;
+  leida: boolean;
+  fechaEnvio: string;
+  createdAt: string;
+  version: '1.6.0';  // ✅ Siempre presente
+  
+  // Metadata para META_COMPARTIDA
+  metaId?: number;
+  usuarioInvitador?: string;
+  metaNombre?: string;
+}
+```
+
+### Validación TypeScript:
+```typescript
+const validarNotificacion = (notif: any): notif is NotificacionV160 => {
+  return (
+    notif.version === '1.6.0' &&
+    (notif.tipo !== 'META_COMPARTIDA' || (
+      typeof notif.metaId === 'number' &&
+      typeof notif.usuarioInvitador === 'string' &&
+      typeof notif.metaNombre === 'string'
+    ))
+  );
+};
+```
+
+---
+
+**✅ Documentación completa y actualizada con todas las correcciones y mejores prácticas.**
 
