@@ -38,6 +38,7 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/health", "/api/ping").permitAll() // ⚡ Warmup endpoints
+                        .requestMatchers("/api/maintenance/**").permitAll() // 🔧 Mantenimiento (temporal)
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Endpoints protegidos

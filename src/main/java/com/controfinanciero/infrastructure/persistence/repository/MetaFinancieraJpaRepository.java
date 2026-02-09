@@ -53,5 +53,15 @@ public interface MetaFinancieraJpaRepository extends JpaRepository<MetaFinancier
             @Param("userId") Long userId,
             @Param("date") LocalDate date
     );
+
+    /**
+     * 🤝 Busca metas donde el usuario es colaborador activo
+     * Incluye metas propias Y metas compartidas ACEPTADAS
+     */
+    @Query("SELECT DISTINCT m FROM MetaFinancieraEntity m " +
+           "LEFT JOIN MetaColaboradorEntity c ON m.id = c.metaId " +
+           "WHERE m.userId = :userId " +
+           "OR (c.usuarioId = :userId AND c.activo = true AND c.aceptadoAt IS NOT NULL)")
+    List<MetaFinancieraEntity> findAllMetasIncludingShared(@Param("userId") Long userId);
 }
 

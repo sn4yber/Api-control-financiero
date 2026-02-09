@@ -52,7 +52,8 @@ public class MetaFinancieraRepositoryAdapter implements MetaFinancieraRepository
 
     @Override
     public List<MetaFinanciera> findByUsuarioId(Long usuarioId) {
-        return jpaRepository.findByUserId(usuarioId).stream()
+        // ✅ Ahora incluye metas propias Y metas compartidas donde es colaborador activo
+        return jpaRepository.findAllMetasIncludingShared(usuarioId).stream()
                 .map(MetaFinancieraEntityMapper::toDomain)
                 .collect(Collectors.toList());
     }

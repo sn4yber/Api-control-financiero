@@ -47,6 +47,12 @@ public class SharedGoalsService {
             throw new RuntimeException("No puedes compartir una meta contigo mismo");
         }
 
+        // ✅ VALIDAR QUE NO EXISTA YA UN COLABORADOR (evita duplicados)
+        var colaboradorExistente = colaboradorRepository.findByMetaIdAndUsuarioId(metaId, usuarioInvitado.getId());
+        if (colaboradorExistente.isPresent()) {
+            throw new RuntimeException("Este usuario ya es colaborador de esta meta");
+        }
+
         // Obtener nombre de la meta
         var meta = metaRepository.findById(metaId)
                 .orElseThrow(() -> new RuntimeException("Meta no encontrada"));
