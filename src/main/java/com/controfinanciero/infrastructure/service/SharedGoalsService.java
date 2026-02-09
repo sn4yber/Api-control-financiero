@@ -242,5 +242,43 @@ public class SharedGoalsService {
                             colaboradorId, metaId, usuarioCreadorId);
                 });
     }
+
+    /**
+     * Obtener historial detallado de aportes de una meta compartida
+     */
+    public List<AporteDetallado> obtenerAportesDetallados(Long metaId) {
+        List<MetaColaboradorEntity> colaboradores = colaboradorRepository.findByMetaId(metaId);
+
+        return colaboradores.stream()
+                .filter(c -> c.getAporteTotal().compareTo(BigDecimal.ZERO) > 0)
+                .map(c -> {
+                    var usuario = usuarioRepository.findById(c.getUsuarioId())
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                    return new AporteDetallado(
+                            c.getUsuarioId(),
+                            usuario.getUsername(),
+                            usuario.getEmail(),
+                            c.getAporteTotal(),
+                            c.getPorcentajeAporte(),
+                            c.getEsCreador(),
+                            c.getAceptadoAt()
+                    );
+                })
+                .toList();
+    }
+
+    /**
+     * DTO para aportes detallados
+     */
+    public record AporteDetallado(
+            Long usuarioId,
+            String username,
+            String email,
+            BigDecimal aporteTotal,
+            Double porcentajeAporte,
+            Boolean esCreador,
+            LocalDateTime fechaAceptacion
+    ) {}
 }
 

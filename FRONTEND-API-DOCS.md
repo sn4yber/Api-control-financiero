@@ -200,3 +200,35 @@ const aceptarInvitacion = async (metaId: number) => {
 ---
 **Última actualización:** 2026-02-09  
 **Versión:** 1.0
+---
+### Obtener Aportes de Meta Compartida
+```typescript
+const fetchAportes = async (metaId: number) => {
+  const response = await fetch(`/api/metas-compartidas/${metaId}/aportes`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const aportes = await response.json();
+  // Ejemplo de respuesta:
+  // [
+  //   {
+  //     usuarioId: 5,
+  //     username: "sn4yber2",
+  //     email: "bmxsnayber@gmail.com",
+  //     aporteTotal: 1500.00,
+  //     porcentajeAporte: 30.0,
+  //     esCreador: true,
+  //     fechaAceptacion: "2026-02-09T10:10:17.397693"
+  //   },
+  //   ...
+  // ]
+  return aportes;
+};
+```
+**Endpoint:** `GET /api/metas-compartidas/{metaId}/aportes`
+**Headers:**
+- Authorization: Bearer {token}
+**curl:**
+```bash
+curl -X GET http://localhost:8080/api/metas-compartidas/14/aportes \
+  -H "Authorization: Bearer $TOKEN"
+```

@@ -80,6 +80,16 @@ public class MetasCompartidasController {
     }
 
     /**
+     * GET /api/metas-compartidas/{metaId}/aportes
+     * Obtener historial de aportes de una meta compartida
+     */
+    @GetMapping("/{metaId}/aportes")
+    public ResponseEntity<?> obtenerAportes(@PathVariable Long metaId) {
+        var aportes = sharedGoalsService.obtenerAportesDetallados(metaId);
+        return ResponseEntity.ok(aportes);
+    }
+
+    /**
      * GET /api/metas-compartidas/mis-metas
      * Obtener metas donde el usuario es colaborador
      */
